@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp" >
+
+    <EditText
+        android:id="@+id/login_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_username"
+        android:inputType="textNoSuggestions"
+        android:padding="@dimen/input_padding"
+        android:singleLine="true"
+        android:textSize="@dimen/input_text_size" >
+    </EditText>
+
+    <EditText
+        android:id="@+id/login_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_email_register"
+        android:inputType="textEmailAddress"
+        android:padding="@dimen/input_padding"
+        android:textSize="@dimen/input_text_size" />
+
+    <EditText
+        android:id="@+id/login_pass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_password"
+        android:inputType="textPassword"
+        android:padding="@dimen/input_padding"
+        android:textSize="@dimen/input_text_size" />
+
+    <EditText
+        android:id="@+id/login_pass_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_password_confirm"
+        android:inputType="textPassword"
+        android:padding="@dimen/input_padding"
+        android:textSize="@dimen/input_text_size" />
+
+    <Button
+        android:id="@+id/login_submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_register" />
+
+    <include
+        android:id="@+id/login_progress"
+        layout="@layout/module_list_footer"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/login_accounts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

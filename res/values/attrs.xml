@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="LocationSettings">
+        <attr name="edit" format="boolean" />
+        <attr name="addRemove" format="boolean" />
+        <attr name="radius" format="boolean" />
+    </declare-styleable>
+
+</resources>

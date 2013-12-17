@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.broadcaster.view.ListViewWithOverScroll xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/posts"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DDDDDD"
+    android:divider="@null"
+    android:dividerHeight="10dp" />

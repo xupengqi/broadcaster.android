@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <TextView
+            android:id="@+id/post_update_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/post_new_attr_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_margin="5dp" >
+
+            <Spinner
+                android:id="@+id/post_new_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:drawableLeft="@drawable/ic_action_labels"
+                android:ems="10"
+                android:layout_marginRight="20dp"
+                android:layout_weight="1" >
+            </Spinner>
+
+            <EditText
+                android:id="@+id/post_new_location"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_action_place"
+                android:ems="10"
+                android:enabled="false"
+                android:hint="@string/hint_location" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/post_new_title_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/post_new_attr_group"
+            android:layout_margin="5dp"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/post_new_attach"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/ic_action_new" />
+
+            <EditText
+                android:id="@+id/post_new_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/hint_title" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/post_new_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/post_new_title_group"
+            android:ems="10"
+            android:hint="@string/hint_text" >
+        </EditText>
+
+        <HorizontalScrollView
+            android:id="@+id/post_new_attachments_scroll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/post_new_text"
+            android:layout_gravity="center_horizontal" >
+
+            <LinearLayout
+                android:id="@+id/post_new_attachments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp" >
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:id="@+id/post_new_attach_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/post_new_title_group"
+            android:layout_margin="5dp"
+            android:background="#eeeeee"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <Button
+                android:id="@+id/post_new_attach_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_action_picture"
+                android:text="@string/take_picture" />
+
+            <Button
+                android:id="@+id/post_new_attach_video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_action_video"
+                android:text="@string/record_video" />
+
+            <com.broadcaster.view.AudioCaptureButton
+                android:id="@+id/post_new_attach_audio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_action_mic"
+                android:text="@string/record_audio" />
+        </LinearLayout>
+
+        <include layout="@layout/fragment_loading" />
+    </RelativeLayout>
+
+    <include layout="@layout/module_drawer" />
+
+</android.support.v4.widget.DrawerLayout>

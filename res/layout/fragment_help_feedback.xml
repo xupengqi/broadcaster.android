@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp" >
+
+    <EditText
+        android:id="@+id/feedback_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_email_feedback"
+        android:inputType="textEmailAddress"
+        android:padding="@dimen/input_padding"
+        android:singleLine="true"
+        android:textSize="@dimen/input_text_size" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/feedback_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_feedback"
+        android:padding="@dimen/input_padding"
+        android:textSize="@dimen/input_text_size" />
+</LinearLayout>

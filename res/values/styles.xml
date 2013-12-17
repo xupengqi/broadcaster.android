@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+
+    <style name="activity_cab_style" parent="@style/AppTheme">
+
+        <!-- Theme.Holo.Light.NoActionBar -->
+<!--         <item name="android:actionModeCloseButtonStyle">@style/customActionModeCloseButtonStyle</item> -->
+        <!-- <item name="android:actionModeBackground">@drawable/activity_list_view_cab_bg</item> -->
+<!--         <item name="android:actionBarStyle">@style/MyActionBarStyle</item> -->
+    </style>
+
+    <style name="MyActionBarStyle" parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:displayOptions">showTitle</item>
+    </style>
+
+    <style name="customActionModeCloseButtonStyle" parent="@android:style/Widget.ActionButton.CloseMode">
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="gettingStartedTopItemStyle">
+        <item name="android:background">#FFF</item>
+        <item name="android:alpha">0.9</item>
+        <item name="android:padding">6dip</item>
+    </style>
+
+    <style name="gettingStartedItemStyle">
+        <item name="android:background">#EEE</item>
+        <item name="android:alpha">0.9</item>
+        <item name="android:padding">6dip</item>
+        <item name="android:layout_marginTop">6dip</item>
+    </style>
+
+    <style name="gettingStartedBottomItemStyle">
+        <item name="android:background">#333</item>
+        <item name="android:alpha">0.7</item>
+        <item name="android:padding">6dip</item>
+        <item name="android:layout_marginTop">6dip</item>
+    </style>
+
+    <style name="settingsModuleStyle">
+        <item name="android:background">@drawable/settings_module_bg</item>
+        <item name="android:layout_margin">5dip</item>
+        <item name="android:padding">5dip</item>
+    </style>
+
+    <style name="settingsLocationTitle">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14dip</item>
+    </style>
+
+    <style name="drawerRightButton">
+        <item name="android:background">@drawable/drawer_item_right_bg</item>
+        <item name="android:padding">5dip</item>
+        <item name="android:textColor">#EEE</item>
+    </style>
+
+</resources>

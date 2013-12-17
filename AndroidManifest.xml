@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.broadcaster"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="16"
+        android:targetSdkVersion="18" />
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" >
+    </uses-permission>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/app_icon"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.broadcaster.Splash"
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
+        </activity>
+        <activity
+            android:name="com.broadcaster.ListByPref"
+            android:label="@string/app_name"
+            android:theme="@style/activity_cab_style" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.broadcaster.ListByParent"
+            android:label="@string/app_name"
+            android:theme="@style/activity_cab_style" >
+        </activity>
+        <activity
+            android:name="com.broadcaster.ListByTopic"
+            android:label="@string/app_name"
+            android:theme="@style/activity_cab_style" >
+        </activity>
+        <activity
+            android:name="com.broadcaster.ListByUser"
+            android:label="@string/app_name"
+            android:theme="@style/activity_cab_style" >
+        </activity>
+        <activity
+            android:name="com.broadcaster.ListStarred"
+            android:label="@string/title_activity_starred"
+            android:theme="@style/activity_cab_style" >
+        </activity>
+        <activity
+            android:name="com.broadcaster.Account"
+            android:label="@string/title_activity_account"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name="com.broadcaster.PostNew"
+            android:label="@string/title_activity_post_new" />
+        <activity
+            android:name="com.broadcaster.PostEdit"
+            android:label="@string/title_activity_post_update" />
+        <activity
+            android:name="com.broadcaster.Topics"
+            android:label="@string/title_activity_topics" />
+        <activity
+            android:name="com.broadcaster.Settings"
+            android:label="@string/title_activity_settings" />
+        <activity
+            android:name="com.broadcaster.Help"
+            android:label="@string/title_activity_help" />
+        <activity android:name="com.broadcaster.NoLocation" />
+
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+
+        <activity android:name="com.facebook.LoginActivity" />
+    </application>
+
+</manifest>

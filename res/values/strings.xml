@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="facebook_app_id">154316887933772</string>
+
+    <string name="app_name">Broadcaster</string>
+    <string name="title_activity_account">Account</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_post_new">New Post</string>
+    <string name="title_activity_topics">Topics</string>
+    <string name="title_activity_my_posts">My Posts</string>
+    <string name="title_activity_starred">Starred</string>
+    <string name="title_activity_post_update">Update Post</string>
+    <string name="title_activity_help">Help</string>
+    <string name="hint_title">Title</string>
+    <string name="hint_location">Earth</string>
+    <string name="hint_text">Description (Optional)</string>
+    <string name="hint_reply">Text</string>
+    <string name="hint_custom_topic">Your topic here...</string>
+    <string name="button_send">Send</string>
+    <string name="default_tag">default</string>
+    <string name="action_bar_swipe">Swipe down to refresh</string>
+
+    <!-- _fragment_account_*.xml -->
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_password_confirm">Password Again</string>
+    <string name="hint_email_register">Account Recovery Email (optional)</string>
+    <string name="hint_email_feedback">Email (optional)</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_feedback">Feedback...</string>
+    <string name="button_login">Login</string>
+    <string name="button_register">Register</string>
+    <string name="button_pass">Reset Password</string>
+    <!-- _fragment_account_*.xml -->
+
+
+    <!-- activity_post_new.xml -->
+    <string name="create">Create</string>
+    <string name="take_picture">Picture</string>
+    <string name="record_audio">Audio</string>
+    <string name="record_video">Video</string>
+    <!-- activity_post_new.xml -->
+
+
+    <!-- activity_post.xml -->
+    <string name="delete">Delete</string>
+    <string name="update">Update</string>
+    <!-- activity_post.xml -->
+
+    <string name="drawer_open">Open drawer</string>
+    <string name="drawer_close">Close drawer</string>
+    
+    
+    <string name="getting_started_header">
+    <![CDATA[
+        <b>About Broadcaster:</b> Broadcaster allows you to see whats going on around you or anywhere in the world. Find out about local new and events. Communicate with people near you.
+    ]]>
+    </string>
+    <string name="getting_started_news">
+    <![CDATA[
+        <b>News</b>: find out whats happening around you or any where in the world. Your home page by default will show all topics from your current location. You can change your home to use other locations and personalize topics that interest you.
+    ]]>
+    </string>
+    <string name="getting_started_report">
+    <![CDATA[
+        <b>Be a reporter</b>: Inform others whats happening in your area. Upload a picture or video.
+    ]]>
+    </string>
+    <string name="getting_started_trade">
+    <![CDATA[
+        <b>Sell Something</b>: Sell something to others. Tell people that you have a garage sale!
+    ]]>
+    </string>
+    <string name="getting_started_organize">
+    <![CDATA[
+        <b>Organize a local event</b>: Send a message to your neighbors.
+    ]]>
+    </string>
+    <string name="getting_started_help">
+    <![CDATA[
+        <b>Getting help</b>: Getting help from people nearby.
+    ]]>
+    </string>
+    
+    <string name="getting_started_footer">
+    <![CDATA[
+        Aaron Xu<br/>
+        admin@thebroadcaster.me<br/>
+        <i>Copyright © 2013 Broadcaster Inc. </i>
+    ]]>
+    </string>
+
+</resources>
