@@ -3,6 +3,7 @@ package com.broadcaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.http.message.BasicNameValuePair;
@@ -146,12 +147,16 @@ public class PostNew extends BaseDrawerActivity {
         postTagItems.clear();
         prevSelectedTopic = 0;
         String[] topics = pref.getAllTags().split(",");
+        HashSet<String> topicSet = new HashSet<String>();
         for (String topic : topics) {
             postTagItems.add(topic);
+            topicSet.add(topic);
         }    
         List<String> myTopics = pref.getMyTopics();
         for (String topic : myTopics) {
-            postTagItems.add(topic);
+            if (!topicSet.contains(topic)) {
+                postTagItems.add(topic);
+            }
         }    
         postTagItems.add("[Custom]");
         

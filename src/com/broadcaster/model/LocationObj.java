@@ -15,6 +15,6 @@ public class LocationObj implements Serializable {
         name = n;
         latitude = lat;
         longitude = lng;
-        exp = (new Date()).getTime()+300000;
+        exp = (new Date()).getTime()+3600000; // 1 hour
     }
 }
