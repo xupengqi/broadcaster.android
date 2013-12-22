@@ -24,6 +24,7 @@ import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
 import com.broadcaster.util.Constants.TASK;
 import com.broadcaster.util.Constants.TASK_RESULT;
+import com.broadcaster.util.ImageUtil;
 import com.broadcaster.util.TaskListener;
 import com.broadcaster.util.TaskManager;
 import com.broadcaster.util.Util;
@@ -34,13 +35,9 @@ public class AttachObj implements Serializable {
     public MEDIA_TYPE type;
     public String dir;
     public String id;
-    public Bitmap preview;
-
     public String fileName;
 
-    public AttachObj() {
-
-    }
+    public AttachObj() { }
 
     public AttachObj(MEDIA_TYPE t, String f) {
         type = t;
@@ -67,6 +64,22 @@ public class AttachObj implements Serializable {
             break;
         }
         return Constants.host+"data/"+dir+"/"+id+ext;
+    }
+
+    public Bitmap getThumb(BaseActivity activity) throws IOException {
+        if(fileName != null) {
+            switch(type) {
+            case AUDIO:
+                return BitmapFactory.decodeResource(activity.getResources(), R.drawable.sound);
+            case IMAGE:
+                return ImageUtil.getThumbnailFromFile(fileName, 200);
+            case VIDEO:
+                return ImageUtil.createVideoThumbMini(fileName);
+            default:
+                break;
+            }
+        }
+        return null;
     }
 
     public static void renderAttachment(final BaseActivity context, final PostObj post, final String file, final AttachObj attachObj, final MEDIA_TYPE type, final View attachmentsView, final boolean create, final AttachmentInteractListener l) throws MalformedURLException, IOException {
@@ -116,7 +129,7 @@ public class AttachObj implements Serializable {
         else {
             lp = new LinearLayout.LayoutParams(Util.dpToPixel(context, Constants.THUMB_WIDTH_PREVIEW), Util.dpToPixel(context,  Constants.THUMB_HEIGHT_PREVIEW));
         }
-        int padding =  Util.dpToPixel(context, 7);
+        //        int padding =  Util.dpToPixel(context, 7);
         int leftMargin = 0;
         if (attachmentsView.getChildCount() > 0) {
             leftMargin = Util.dpToPixel(context, 3);

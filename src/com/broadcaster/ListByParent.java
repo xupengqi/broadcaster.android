@@ -1,8 +1,6 @@
 package com.broadcaster;
 
-import java.util.List;
-
-import org.apache.http.NameValuePair;
+import java.util.Map;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,6 +18,7 @@ import com.broadcaster.model.PostObj;
 import com.broadcaster.model.PostViewHolder;
 import com.broadcaster.model.ResponseObj;
 import com.broadcaster.model.TaskItem;
+import com.broadcaster.task.TaskPostDel;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.TASK;
 import com.broadcaster.util.Constants.TASK_RESULT;
@@ -101,14 +100,17 @@ public class ListByParent extends BaseDrawerListActivity {
             return true;
         case R.id.menu_delete:
             if(info.position == 0) {
-                List<NameValuePair> params = api.getDeletePostParams(pref.getUser(), post.id, postId);
-                TaskUtil.deleteParentPost(this, listener, params);
+                (new com.broadcaster.task.TaskManager(this))
+                .addTask(new TaskPostDel(post))
+                .exitActivity()
+                .run();
             }
             else {
                 PostObj postToDelete = (PostObj)postListAdapter.getItem(info.position - postListView.getHeaderViewsCount());
                 postToDelete.deleted = true;
-                List<NameValuePair> params = api.getDeletePostParams(pref.getUser(), postToDelete.id, postId);
-                TaskUtil.deletePost(this, listener, params);
+                (new com.broadcaster.task.TaskManager(this))
+                .addTask(new TaskPostDel(postToDelete))
+                .run();
                 updatePostsList();
             }
             return true;
@@ -143,7 +145,8 @@ public class ListByParent extends BaseDrawerListActivity {
     }
 
     @Override
-    public void startLoadingMode() {
+    // TODO: SEACH FOR ALL 4 SHOW/HIDE PROGRESS METHODS AND REVIEW CODE
+    public void showProgressOverlay() {
         if (replyBox != null) {
             hideKeyboard();
             replyBox.setVisibility(View.GONE);
@@ -153,7 +156,7 @@ public class ListByParent extends BaseDrawerListActivity {
     }
 
     @Override
-    public void stopLoadingMode() {
+    public void hideProgressOverlay() {
         if (replyBox != null) {
             replyBox.setVisibility(View.VISIBLE);
             footerProgress.setVisibility(View.GONE);
@@ -213,6 +216,11 @@ public class ListByParent extends BaseDrawerListActivity {
                 switch(ti.task) {
                 case LOAD_POSTS:
                     post = DataParser.parsePost(response);
+                    if (post.id == null) {
+                        showError(this.toString(), "Post not found.");
+                        finish();
+                        return;
+                    }
                     if (headerViewHolder != null) {
                         postListView.removeHeaderView(headerViewHolder.post);
                     }
@@ -268,5 +276,10 @@ public class ListByParent extends BaseDrawerListActivity {
             super.renderPostTop();
             tag.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void exitActivity(Map<TASK_RESULT, Object> results) {
+        finish();
     }
 }

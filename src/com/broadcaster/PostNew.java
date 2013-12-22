@@ -1,12 +1,12 @@
 package com.broadcaster;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.http.message.BasicNameValuePair;
+import java.util.Map;
+import java.util.Queue;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -39,9 +39,12 @@ import com.broadcaster.model.AttachObj.AttachmentInteractListener;
 import com.broadcaster.model.PostObj;
 import com.broadcaster.model.ResponseObj;
 import com.broadcaster.model.TaskItem;
+import com.broadcaster.task.TaskBase;
+import com.broadcaster.task.TaskAttachmentDel;
+import com.broadcaster.task.TaskAttachmentNew;
+import com.broadcaster.task.TaskPostNew;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
-import com.broadcaster.util.Constants.TASK;
 import com.broadcaster.util.Constants.TASK_RESULT;
 import com.broadcaster.util.ImageUtil;
 import com.broadcaster.util.PathUtil;
@@ -104,7 +107,7 @@ public class PostNew extends BaseDrawerActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> arg0) { }
-            
+
         });
         attach.setOnClickListener(new OnClickListener() {
             @Override
@@ -142,7 +145,7 @@ public class PostNew extends BaseDrawerActivity {
         initProgressElements();
         TaskUtil.getRealLocation(this, new NewPostTaskListener());
     }
-    
+
     public void refreshTopics(String selected) {
         postTagItems.clear();
         prevSelectedTopic = 0;
@@ -159,7 +162,7 @@ public class PostNew extends BaseDrawerActivity {
             }
         }    
         postTagItems.add("[Custom]");
-        
+
         for (int i=0; i<postTagItems.size(); i++) {
             if (postTagItems.get(i).equals(selected)) {
                 prevSelectedTopic = i;
@@ -170,7 +173,7 @@ public class PostNew extends BaseDrawerActivity {
         postTagAdapter.notifyDataSetChanged();
         resetPrevTopic();
     }
-    
+
     public void resetPrevTopic() {
         postTag.setSelection(prevSelectedTopic);
     }
@@ -178,8 +181,8 @@ public class PostNew extends BaseDrawerActivity {
     protected void showCustsomTopicDialog() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         TopicDialog customTopicFragment = new TopicDialog();
-        
-            // The device is using a large layout, so show the fragment as a dialog
+
+        // The device is using a large layout, so show the fragment as a dialog
         customTopicFragment.show(fragmentManager, "dialog");
     }
 
@@ -198,21 +201,20 @@ public class PostNew extends BaseDrawerActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_submit:
-            List<TaskItem> attachmentTasks = new ArrayList<TaskItem>();
+            Queue<TaskBase> attachmentTasks = new LinkedList<TaskBase>();
             for(AttachObj attachment : attachments) {
-                MEDIA_TYPE type = attachment.type;
-                String file = attachment.fileName;
-                String id = attachment.id;
-                switch(type) {
+                switch(attachment.type) {
                 case DELETE:
-                    attachmentTasks.add(new TaskItem(TASK.DEL_ATTACHMENT, api.getDelAttachmentParams(pref.getUser(), id), id, type));
+                    attachmentTasks.add(new TaskAttachmentDel(attachment));
                     break;
                 default:
-                    attachmentTasks.add(new TaskItem(TASK.ADD_ATTACHMENT, api.getAddAttachmentParams(pref.getUser(), type), file, type));
+                    attachmentTasks.add(new TaskAttachmentNew(PostNew.this, attachment));
                     break;
                 }
             }
-            submit(attachmentTasks);
+
+            submitPost(attachmentTasks);
+
             hideKeyboard();
             return true;
         default:
@@ -220,8 +222,13 @@ public class PostNew extends BaseDrawerActivity {
         }
     }
 
-    protected void submit(List<TaskItem> attachmentTasks) {
-        TaskUtil.createPost(PostNew.this, new NewPostTaskListener(), attachmentTasks);
+    protected void submitPost(Queue<TaskBase> attachmentTasks) {
+        com.broadcaster.task.TaskManager tm = new com.broadcaster.task.TaskManager(PostNew.this);
+        tm.addTask(new TaskPostNew(constructNewPost()))
+        .addTask(attachmentTasks)
+        .showProgressOverlay()
+        .exitActivity()
+        .run();
     }
 
     @Override
@@ -327,14 +334,14 @@ public class PostNew extends BaseDrawerActivity {
     }
 
     @Override
-    public void startLoadingMode() {
-        super.startLoadingMode();
+    public void showProgressOverlay() {
+        super.showProgressOverlay();
         getActionBar().hide();
     }
 
     @Override
-    public void stopLoadingMode() {
-        super.stopLoadingMode();
+    public void hideProgressOverlay() {
+        super.hideProgressOverlay();
         getActionBar().show();
     }
 
@@ -390,7 +397,12 @@ public class PostNew extends BaseDrawerActivity {
         final int attachmentIndex = attachments.size()-1;
         hideAttach();
 
-        Bitmap thumnail = ImageUtil.getThumbnailFromFile(PostNew.this, imageFile, 200);
+        Bitmap thumnail = null;
+        try {
+            thumnail = ImageUtil.getThumbnailFromFile(imageFile, 200);
+        } catch (IOException e) {
+            Util.logError(this, e);
+        }
         AttachObj.renderAttachment(this, null, imageFile, null, MEDIA_TYPE.IMAGE, thumnail, gallery, true, new AttachmentInteractListener() {
             @Override
             public void onOpen(View v) {
@@ -415,16 +427,6 @@ public class PostNew extends BaseDrawerActivity {
         return list.size() > 0;
     }
 
-    protected void newPostComplete(TaskManager mgr) {
-        Intent intent = new Intent(PostNew.this, ListByParent.class);
-        intent.putExtra("postId", mgr.getResultPostId());
-        startActivity(intent);
-    }
-
-    protected void setProgressImage(Bitmap image) {
-        progressImage.setImageBitmap(image);
-    }
-
     @Override
     public void onGetRealLocation() {
         super.onGetRealLocation();
@@ -432,95 +434,6 @@ public class PostNew extends BaseDrawerActivity {
     }
 
     public class NewPostTaskListener extends TaskListener {
-        @Override
-        public void onPreExecute(TaskItem ti, TaskManager mgr) {
-            super.onPreExecute(ti, mgr);
-
-            PostObj po;
-            switch(ti.task) {
-            case ADD_POST:
-                po = constructNewPost();
-                ti.params = api.getNewPostParams(pref.getUser(), po);
-                break;
-            case UPDATE_POST:
-                po = constructNewPost();
-                po.id = Integer.parseInt(postId.getText().toString());
-                ti.params = api.getUpdatePostParams(pref.getUser(), po);
-                break;
-            case ADD_ATTACHMENT:
-                String fileName = (String) ti.extra;
-                if(fileName != null) {
-                    switch(ti.type) {
-                    case IMAGE:
-                        for(int i=0; i<gallery.getChildCount(); i++) {
-                            View iv = (View)gallery.getChildAt(i);
-                            if(iv.getContentDescription() == fileName) {
-                                iv.buildDrawingCache();
-                                setProgressImage(iv.getDrawingCache());
-                            }
-                        }
-                        break;
-                    case VIDEO:
-                        setProgressImage(ImageUtil.createVideoThumbMini(fileName));
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                break;
-            default:
-                break;
-            }
-        }
-
-        @Override
-        public void onExecute(TaskItem ti, TaskManager mgr) {
-            super.onExecute(ti, mgr);
-
-            ResponseObj response;
-            switch(ti.task) {
-            case ADD_POST:
-                response = api.newPost(ti.params);
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            case UPDATE_POST:
-                response = api.updatePost(ti.params);
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            case ADD_ATTACHMENT:
-                Integer postId = mgr.getResultPostId();
-                String filePath = (String)ti.extra;
-                File file = new File(filePath); 
-                if (ti.type == MEDIA_TYPE.IMAGE) {
-                    try {
-                        file = ImageUtil.optimizeImage(PostNew.this, file, 75);
-                    } catch (IOException e) {
-                        Util.logError(PostNew.this, e);
-                    }
-                }
-
-                ti.params.add(new BasicNameValuePair("data[postId]", Integer.toString(postId)));
-                response = api.newAttachment(ti.params, file, ti.type);
-
-                if (ti.type == MEDIA_TYPE.VIDEO) {
-                    try {
-                        File thumb = ImageUtil.optimizeImage(PostNew.this, ImageUtil.createVideoThumb(filePath), 75);
-                        api.newThumb(api.getNewThumbParams(pref.getUser(), postId, response.data.get("attachId").getAsString()), thumb);
-                    } catch (IOException e) {
-                        Util.logError(PostNew.this, e);
-                    }
-                }
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            case DEL_ATTACHMENT:
-                ti.params.add(new BasicNameValuePair("data[postId]", Integer.toString(mgr.getResultPostId())));
-                response = api.delAttachment(ti.params);
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            default:
-                break;
-            }
-        }
 
         @Override
         public void onPostExecute(TaskItem ti, TaskManager mgr) {
@@ -538,13 +451,6 @@ public class PostNew extends BaseDrawerActivity {
                 //ArrayAdapter<String> tagsAdapter = new ArrayAdapter<String>(PostNew.this, android.R.layout.simple_dropdown_item_1line, pref.getAllTags().split(","));
                 //final AutoCompleteTextView tags = (AutoCompleteTextView) findViewById(R.id.post_new_tag);
                 //tags.setAdapter(tagsAdapter);
-                break;
-            case ADD_POST:
-            case UPDATE_POST:
-                mgr.putResult(TASK_RESULT.POSTID, response.data.get("postId").getAsInt());
-                break;
-            case FINISH:
-                newPostComplete(mgr);
                 break;
             default:
                 break;
@@ -564,5 +470,13 @@ public class PostNew extends BaseDrawerActivity {
 
     protected void removeAttachmentView(View v) {
         ((LinearLayout)v.getParent().getParent()).removeView((LinearLayout)v.getParent());
+    }
+
+    @Override
+    public void exitActivity(Map<TASK_RESULT, Object> results) {
+        Intent intent = new Intent(PostNew.this, ListByParent.class);
+        intent.putExtra("postId", Integer.parseInt(results.get(TASK_RESULT.POSTID).toString()));
+        startActivity(intent);
+        finish();
     }
 }

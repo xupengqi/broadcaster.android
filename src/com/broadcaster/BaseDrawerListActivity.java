@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.NameValuePair;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -33,6 +31,8 @@ import com.broadcaster.model.PostObj;
 import com.broadcaster.model.PostViewHolder;
 import com.broadcaster.model.ResponseObj;
 import com.broadcaster.model.TaskItem;
+import com.broadcaster.task.TaskPostDel;
+import com.broadcaster.task.TaskPostUnDel;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.TASK;
 import com.broadcaster.util.Constants.TASK_RESULT;
@@ -306,13 +306,16 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
         case R.id.menu_edit:
-            updatePost((PostObj)postListAdapter.getItem(info.position-postListView.getHeaderViewsCount()));
+            updatePost((PostObj)postListAdapter.getItem(info.position - postListView.getHeaderViewsCount()));
             return true;
         case R.id.menu_delete:
-            PostObj postToDelete = (PostObj)postListAdapter.getItem(info.position-postListView.getHeaderViewsCount());
+            PostObj postToDelete = (PostObj)postListAdapter.getItem(info.position - postListView.getHeaderViewsCount());
             postToDelete.deleted = true;
-            List<NameValuePair> params = api.getDeletePostParams(pref.getUser(), postToDelete.id);
-            TaskUtil.deletePost(this, listener, params);
+
+            (new com.broadcaster.task.TaskManager(this))
+            .addTask(new TaskPostDel(postToDelete))
+            .run();
+            
             updatePostsList();
             return true;
         default:
@@ -334,25 +337,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     @Override
     protected int getContentView() {
         return R.layout.activity_list;
-    }
-
-    // TODO: LINE actionBarProgressText.setText(getTaskMessage(task)); 
-    //10-27 19:05:00.762: E/AndroidRuntime(30769): Caused by: android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.BaseDrawerListActivity.setProgressText(BaseDrawerListActivity.java:347)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager.begin(TaskManager.java:104)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.Util.logError(Util.java:66)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.obj.AttachObj$5.onExecute(AttachObj.java:183)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager$TaskRunner.doInBackground(TaskManager.java:156)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager$TaskRunner.doInBackground(TaskManager.java:1)
-    @Override
-    public void setProgressText(TASK task) {
-        super.setProgressText(task);
-        if (footerText != null) {
-            footerText.setText(getTaskMessage(task));
-        }
-        if (actionBarProgressText != null) {
-            actionBarProgressText.setText(getTaskMessage(task));
-        }
     }
 
     protected void initTopicsSpinnerItems() {
@@ -409,7 +393,14 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     }
 
     protected void updatePostsList() {
+        updatePostsList(true);
+    }
+
+    protected void updatePostsList(boolean saveToCache) {
         postListAdapter.notifyDataSetChanged();
+        if (saveToCache) {
+            pref.setPosts(tag, location.name, currentPosts);
+        }
     }
 
     protected void updatePost(PostObj post) {
@@ -421,8 +412,10 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     
     public void undoDelete(PostObj post) {
         post.deleted = false;
-        List<NameValuePair> params = api.getDeletePostParams(pref.getUser(), post.id);
-        TaskUtil.undoDelete(this, listener, params);
+        (new com.broadcaster.task.TaskManager(this))
+        .addTask(new TaskPostUnDel(post))
+        .showProgressAction()
+        .run();
         updatePostsList();
     }
 
@@ -440,14 +433,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
                 break;
             case LOAD_MORE_POSTS:
                 response = loadMorePosts(ti, mgr);
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            case DELETE_POST:
-                response = api.deletePost(ti.params);
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            case UNDO_DELETE_POST:
-                response = api.udnoDeletePost(ti.params);
                 mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
                 break;
             default:
@@ -473,7 +458,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
                     loadedPosts = DataParser.parsePosts(response);
                     currentPosts.clear();
                     currentPosts.addAll(loadedPosts);
-                    pref.setPosts(tag, location.name, currentPosts);
                     if(loadedPosts.size() < Constants.POST_PAGE_SIZE) {
                         haveMoreToLoad = false;
                         noMoreToLoad();
@@ -495,12 +479,11 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
                         haveMoreToLoad = true;
                         loadingMore();
                     }
-                    updatePostsList();
+                    updatePostsList(false);
                     break;
                 case LOAD_MORE_POSTS:
                     loadedPosts = DataParser.parsePosts(response);
                     currentPosts.addAll(loadedPosts);
-                    pref.setPosts(tag, location.name, currentPosts);
                     if(loadedPosts.size() < Constants.POST_PAGE_SIZE) {
                         haveMoreToLoad = false;
                         noMoreToLoad();
@@ -519,9 +502,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
                     break;
                 case GET_TAGS:
                     refreshTopicsSpinner();
-                    break;
-                case DELETE_POST:
-                    showToast("Post deleted.");
                     break;
                 default:
                     break;
@@ -607,4 +587,46 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
 //        }
 //        return 0;
 //    }
+
+    // TODO: LINE actionBarProgressText.setText(getTaskMessage(task)); 
+    //10-27 19:05:00.762: E/AndroidRuntime(30769): Caused by: android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
+    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.BaseDrawerListActivity.setProgressText(BaseDrawerListActivity.java:347)
+    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager.begin(TaskManager.java:104)
+    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.Util.logError(Util.java:66)
+    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.obj.AttachObj$5.onExecute(AttachObj.java:183)
+    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager$TaskRunner.doInBackground(TaskManager.java:156)
+    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager$TaskRunner.doInBackground(TaskManager.java:1)
+    @Override
+    public void setProgressText(TASK task) {
+        super.setProgressText(task);
+        if (footerText != null) {
+            footerText.setText(getTaskMessage(task));
+        }
+        if (actionBarProgressText != null) {
+            actionBarProgressText.setText(getTaskMessage(task));
+        }
+    }
+    
+    @Override
+    public void setProgressText(String text) {
+        super.setProgressText(text);
+        if (footerText != null) {
+            footerText.setText(text);
+        }
+        if (actionBarProgressText != null) {
+            actionBarProgressText.setText(text);
+        }
+    }
+
+    @Override
+    public void showProgressAction() {
+        contextualActionBarStart();
+        actionBarProgressBar.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        actionBarProgressBar.setIndeterminate(true);
+    }
+
+    @Override
+    public void hideProgressAction() {
+        contextualActionBarFinish();
+    }
 }

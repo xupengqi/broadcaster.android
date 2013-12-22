@@ -26,7 +26,7 @@ import android.util.Log;
 import com.broadcaster.BaseActivity;
 
 public class ImageUtil {
-    public static Bitmap getThumbnailFromFile(BaseActivity context, String imageFile, int reqHeight) {
+    public static Bitmap getThumbnailFromFile(String imageFile, int reqHeight) throws IOException {
         // First decode with inJustDecodeBounds=true to check dimensions
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -40,28 +40,23 @@ public class ImageUtil {
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
         Bitmap bitmap = BitmapFactory.decodeFile(imageFile, options);
-        return rotateImage(context, imageFile, bitmap);
+        return rotateImage(imageFile, bitmap);
     }
 
-    private static Bitmap rotateImage(BaseActivity context, String file, Bitmap bitmap) {
-        try {
-            ExifInterface exif = new ExifInterface(file);
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-            Matrix matrix = new Matrix();
-            if (orientation == 6) {
-                matrix.postRotate(90);
-            }
-            else if (orientation == 3) {
-                matrix.postRotate(180);
-            }
-            else if (orientation == 8) {
-                matrix.postRotate(270);
-            }
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true); // rotating bitmap
+    private static Bitmap rotateImage(String file, Bitmap bitmap) throws IOException {
+        ExifInterface exif = new ExifInterface(file);
+        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+        Matrix matrix = new Matrix();
+        if (orientation == 6) {
+            matrix.postRotate(90);
         }
-        catch (Exception e) {
-            Util.logError(context, e);
+        else if (orientation == 3) {
+            matrix.postRotate(180);
         }
+        else if (orientation == 8) {
+            matrix.postRotate(270);
+        }
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true); // rotating bitmap
         return bitmap;
     }
 
@@ -71,10 +66,10 @@ public class ImageUtil {
         //code below may avoid out of memory problem?
 
         Bitmap bitmap = decodeFile(file);
-        bitmap = rotateImage(context, file.getAbsolutePath(), bitmap);
+        bitmap = rotateImage(file.getAbsolutePath(), bitmap);
         return optimizeImage(context, bitmap, quality);
     }
-    
+
     public static File optimizeImage(BaseActivity context, Bitmap bitmap, int quality) throws IOException {
         int inHeight = bitmap.getHeight();
         int inWidth = bitmap.getWidth();

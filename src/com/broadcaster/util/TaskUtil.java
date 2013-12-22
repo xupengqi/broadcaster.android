@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 
 import com.broadcaster.BaseActivity;
-import com.broadcaster.model.TaskItem;
 import com.broadcaster.util.Constants.TASK;
 
 public class TaskUtil {
@@ -28,24 +27,24 @@ public class TaskUtil {
         .begin();
     }
 
-    public static void deleteParentPost(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.DELETE_POST, params)
-        .addTask(TASK.FINISH)
-        .begin();
-    }
+//    public static void deleteParentPost(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
+//        TaskManager.getExecuter(activity, listener)
+//        .addTask(TASK.DELETE_POST, params)
+//        .addTask(TASK.FINISH)
+//        .begin();
+//    }
+//
+//    public static void deletePost(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
+//        TaskManager.getExecuter(activity, listener)
+//        .addTask(TASK.DELETE_POST, params)
+//        .begin();
+//    }
 
-    public static void deletePost(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.DELETE_POST, params)
-        .begin();
-    }
-
-    public static void undoDelete(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.UNDO_DELETE_POST, params)
-        .begin();
-    }
+//    public static void undoDelete(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
+//        TaskManager.getExecuter(activity, listener)
+//        .addTask(TASK.UNDO_DELETE_POST, params)
+//        .begin();
+//    }
 
     public static void getViewingLocation(BaseActivity activity, TaskListener listener) {
         TaskManager.getExecuter(activity, listener)
@@ -69,7 +68,8 @@ public class TaskUtil {
         .begin();
     }
 
-    public static void createPost(BaseActivity activity, TaskListener listener, List<TaskItem> attachments) {
+    // TODO :CREAET/UPDATE POST LOCATION
+    /*public static void createPost(BaseActivity activity, TaskListener listener, List<TaskItem> attachments) {
         TaskManager tm = TaskManager.getExecuter(activity, listener)
                 .addTask(TASK.SHOW_PROGRESS)
                 .addTask(TASK.GET_LOCATION)
@@ -79,9 +79,9 @@ public class TaskUtil {
             tm.addTask(ti);
         }
         tm.addTask(TASK.FINISH).begin();
-    }
+    }*/
 
-    public static void updatePost(BaseActivity activity, TaskListener listener, List<TaskItem> attachments) {
+    /*public static void updatePost(BaseActivity activity, TaskListener listener, List<TaskItem> attachments) {
         TaskManager tm = TaskManager.getExecuter(activity, listener)
                 .addTask(TASK.SHOW_PROGRESS)
                 .addTask(TASK.GET_LOCATION)
@@ -91,7 +91,7 @@ public class TaskUtil {
             tm.addTask(ti);
         }
         tm.addTask(TASK.FINISH).begin();
-    }
+    }*/
 
     public static void loadMorePosts(BaseActivity activity, TaskListener listener) {
         TaskManager.getExecuter(activity, listener)

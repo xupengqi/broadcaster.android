@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -23,7 +24,6 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.broadcaster.R;
 import com.broadcaster.model.DrawerItemHolder;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.DRAWER_ITEMS;
@@ -116,7 +116,7 @@ public abstract class BaseDrawerActivity extends BaseActivity {
         View drawerFooter = mInflater.inflate(R.layout.module_drawer_footer, null);
         drawerLocations = (LocationSettings) drawerFooter.findViewById(R.id.left_drawer_locations);
         drawerList.addFooterView(drawerFooter);
-        
+
         drawerList.setAdapter(drawerAdapter);
         drawerList.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -170,7 +170,7 @@ public abstract class BaseDrawerActivity extends BaseActivity {
             break;
         }
     }
-    
+
     @Override
     public void onResume() {
         initDrawerItems(drawerItems);
@@ -190,11 +190,11 @@ public abstract class BaseDrawerActivity extends BaseActivity {
             drawerUsername.setVisibility(View.GONE);
             drawerEmail.setVisibility(View.GONE);
         }
-        
+
         if (pref.getLocations().size() > 0) {
-            
+
         }
-        
+
         super.onResume();
     }
 
@@ -241,32 +241,9 @@ public abstract class BaseDrawerActivity extends BaseActivity {
 
         progressCancel.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                stopLoadingMode();
+                hideProgressOverlay();
             }
         });
-    }
-
-    @Override
-    public void startLoadingMode() {
-        if (loading != null) {
-            loading.setVisibility(View.VISIBLE);
-            //getActionBar().hide();
-        }
-    }
-
-    @Override
-    public void stopLoadingMode() {
-        if (loading != null) {
-            loading.setVisibility(View.GONE);
-            //getActionBar().show();
-        }
-    }
-
-    @Override
-    public void setProgressText(TASK task) {
-        if (progressText != null) {
-            progressText.setText(getTaskMessage(task));
-        }
     }
 
     protected CharSequence getDrawerItemText(DRAWER_ITEMS item) {
@@ -338,5 +315,47 @@ public abstract class BaseDrawerActivity extends BaseActivity {
         }
 
         return tag;
+    }
+
+    @Override
+    public void showProgressOverlay() {
+        if (loading != null) {
+            loading.setVisibility(View.VISIBLE);
+            //getActionBar().hide();
+        }
+    }
+
+    @Override
+    public void hideProgressOverlay() {
+        if (loading != null) {
+            loading.setVisibility(View.GONE);
+            //getActionBar().show();
+        }
+    }
+
+    @Override
+    public void setProgressText(String text) {
+        if (progressText != null) {
+            progressText.setText(text);
+        }
+    }
+
+    @Override
+    public void setProgressText(TASK task) {
+        if (progressText != null) {
+            progressText.setText(getTaskMessage(task));
+        }
+    }
+
+    @Override
+    public void setProgressImage(Bitmap image) {
+        // TODO: REMOVE IF
+        if (progressImage != null) {
+            progressImage.setVisibility(View.VISIBLE);
+            progressImage.setImageBitmap(image);
+        }
+        else {
+            progressImage.setVisibility(View.GONE);
+        }
     }
 }

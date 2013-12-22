@@ -45,7 +45,7 @@ public class Splash extends BaseActivity {
     }
 
     @Override
-    public void stopLoadingMode() {
+    public void hideProgressOverlay() {
     }
 
     @Override

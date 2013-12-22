@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -20,6 +21,7 @@ import com.broadcaster.model.LocationObj;
 import com.broadcaster.util.AccountTaskListener;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.TASK;
+import com.broadcaster.util.Constants.TASK_RESULT;
 import com.broadcaster.util.PrefUtil;
 import com.broadcaster.util.RestAPI;
 import com.broadcaster.util.TaskUtil;
@@ -303,20 +305,6 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
         Toast.makeText(this, toast, Toast.LENGTH_LONG).show();
     }
 
-    public void startLoadingMode() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void stopLoadingMode() {
-        throw new UnsupportedOperationException();
-    }
-
-    protected int getContentView() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setProgressText(TASK task) { }
-
     public void onGetLocation() { }
 
     public void onGetRealLocation() { }
@@ -334,14 +322,14 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
             return "Loading posts from cache...";
         case LOAD_MORE_POSTS:
             return "Getting new posts...";
-        case ADD_POST:
-            return "Creating post...";
-        case ADD_ATTACHMENT:
-            return "Uploading attachment...";
+        /*case ADD_POST:
+            return "Creating post...";*/
+//        case ADD_ATTACHMENT:
+//            return "Uploading attachment...";
         case LOGIN:
             return "Authenticating with server...";
         case SHOW_PROGRESS:
-        case FINISH:
+//        case FINISH:
         case DOWNLOAD:
             return "";
         default:
@@ -396,5 +384,42 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
         // Save the intent so that we can start an activity when the user clicks
         // the sign-in button.
         mConnectionResult = result;
+    }
+
+    public void showProgressOverlay() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void hideProgressOverlay() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void showProgressAction() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void hideProgressAction() {
+        throw new UnsupportedOperationException();
+    }
+
+    //TODO: REMOVE
+    public void setProgressText(TASK task) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setProgressText(String text) {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void setProgressImage(Bitmap image) {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void exitActivity(Map<TASK_RESULT, Object> results) {
+        throw new UnsupportedOperationException();
+    }
+
+    protected int getContentView() {
+        throw new UnsupportedOperationException();
     }
 }

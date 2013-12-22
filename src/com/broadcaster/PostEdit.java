@@ -2,7 +2,7 @@ package com.broadcaster;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.List;
+import java.util.Queue;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -11,12 +11,11 @@ import android.view.Menu;
 import android.view.View;
 
 import com.broadcaster.model.AttachObj;
-import com.broadcaster.model.PostObj;
-import com.broadcaster.model.TaskItem;
 import com.broadcaster.model.AttachObj.AttachmentInteractListener;
+import com.broadcaster.model.PostObj;
+import com.broadcaster.task.TaskBase;
+import com.broadcaster.task.TaskPostUpdate;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
-import com.broadcaster.util.TaskManager;
-import com.broadcaster.util.TaskUtil;
 import com.broadcaster.util.Util;
 
 public class PostEdit extends PostNew {
@@ -34,6 +33,7 @@ public class PostEdit extends PostNew {
                     postTag.setSelection(i);
                 }
             }
+            postTitle.setText(post.getTitle());
             postText.setText(post.getText());
         }
         else {
@@ -42,7 +42,6 @@ public class PostEdit extends PostNew {
             postText.setVisibility(View.GONE);
         }
 
-        //if (post.content.attachments != null) {
         for (int i = 0; i < post.getAttachments().size(); i++) {
             AttachObj attach = post.getAttachments().get(i);
             try {
@@ -74,8 +73,20 @@ public class PostEdit extends PostNew {
     }
 
     @Override
-    protected void submit(List<TaskItem> attachmentTasks) {
-        TaskUtil.updatePost(PostEdit.this, new NewPostTaskListener(), attachmentTasks);
+    protected void submitPost(Queue<TaskBase> attachmentTasks) {
+        com.broadcaster.task.TaskManager tm = new com.broadcaster.task.TaskManager(PostEdit.this);
+        tm.addTask(new TaskPostUpdate(constructNewPost()))
+        .addTask(attachmentTasks)
+        .showProgressOverlay()
+        .exitActivity()
+        .run();
+    }
+
+    @Override
+    public PostObj constructNewPost() {
+        PostObj po = super.constructNewPost();
+        po.id = Integer.parseInt(postId.getText().toString());
+        return po;
     }
 
     private void insertAudio(final PostObj post, final AttachObj attach) throws MalformedURLException, IOException {
@@ -133,11 +144,6 @@ public class PostEdit extends PostNew {
                 return true;
             }
         });
-    }
-
-    @Override
-    protected void newPostComplete(TaskManager mgr) {
-        finish();
     }
 
     protected void deleteAttachment(View v, AttachObj attach) {

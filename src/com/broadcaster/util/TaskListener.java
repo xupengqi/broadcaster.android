@@ -27,7 +27,7 @@ public class TaskListener {
     public void onPreExecute(TaskItem ti, TaskManager mgr) {
         switch(ti.task) {
         case SHOW_PROGRESS:
-            mgr.activity.startLoadingMode();
+            mgr.activity.showProgressOverlay();
             break;
         default:
             break;
@@ -91,9 +91,9 @@ public class TaskListener {
                 mgr.activity.startActivity(i);
                 mgr.activity.finish();
                 break;
-            case FINISH:
-                mgr.activity.finish();
-                break;
+//            case FINISH:
+//                mgr.activity.finish();
+//                break;
             default:
                 break;
             }

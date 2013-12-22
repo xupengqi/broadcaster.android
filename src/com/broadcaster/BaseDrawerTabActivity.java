@@ -81,7 +81,7 @@ public class BaseDrawerTabActivity extends BaseDrawerActivity {
     }
 
     @Override
-    public void startLoadingMode() {
+    public void showProgressOverlay() {
         if (currentFragments != null) {
             //super.startLoadingMode();
             //getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -92,7 +92,7 @@ public class BaseDrawerTabActivity extends BaseDrawerActivity {
     }
 
     @Override
-    public void stopLoadingMode() {
+    public void hideProgressOverlay() {
         if (currentFragments != null) {
             //super.stopLoadingMode();
             //getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);

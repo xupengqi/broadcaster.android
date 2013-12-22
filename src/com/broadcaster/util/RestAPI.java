@@ -24,6 +24,7 @@ import android.net.http.AndroidHttpClient;
 import android.util.Log;
 
 import com.broadcaster.BaseActivity;
+import com.broadcaster.model.AttachObj;
 import com.broadcaster.model.GeocodeResponse;
 import com.broadcaster.model.LocationObj;
 import com.broadcaster.model.PostObj;
@@ -41,7 +42,7 @@ public class RestAPI {
         context = c;
         gson = new Gson();
     }
-    
+
     public ResponseObj sendError(Exception e) {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("data[model]", android.os.Build.MODEL));
@@ -90,11 +91,11 @@ public class RestAPI {
     public ResponseObj newAttachment(List<NameValuePair> params, File file, Constants.MEDIA_TYPE type) {
         return sendFileRequest("posts", "attach", params, file, type);
     }
-    
+
     public ResponseObj newThumb(List<NameValuePair> params, File file) {
         return sendFileRequest("posts", "thumb", params, file, MEDIA_TYPE.IMAGE);
     }
-    
+
     public ResponseObj delAttachment(List<NameValuePair> params) {
         return sendRequest(Constants.HTTP_METHOD.POST, "posts", "deleteAttach", params);
     }
@@ -106,15 +107,15 @@ public class RestAPI {
     public ResponseObj loginFB(List<NameValuePair> params) {
         return sendRequest(Constants.HTTP_METHOD.POST, "account", "loginfb", params);
     }
-    
+
     public ResponseObj loginGPlus(List<NameValuePair> params) {
         return sendRequest(Constants.HTTP_METHOD.POST, "account", "loginGPlus", params);
     }
-    
+
     public ResponseObj removeGPlus(List<NameValuePair> params) {
         return sendRequest(Constants.HTTP_METHOD.POST, "account", "removeGPlus", params);
     }
-    
+
     public ResponseObj removeFB(List<NameValuePair> params) {
         return sendRequest(Constants.HTTP_METHOD.POST, "account", "removeFB", params);
     }
@@ -187,15 +188,12 @@ public class RestAPI {
         return params;
     }
 
-    public List<NameValuePair> getDeletePostParams(UserObj user, Integer postId) {
+    public List<NameValuePair> getDeletePostParams(UserObj user, PostObj post) {
         List<NameValuePair> params = getAuthParams(user);
-        params.add(new BasicNameValuePair("id", postId.toString()));
-        return params;
-    }
-
-    public List<NameValuePair> getDeletePostParams(UserObj user, Integer postId, Integer parentId) {
-        List<NameValuePair> params = getDeletePostParams(user, postId);
-        params.add(new BasicNameValuePair("parentId", parentId.toString()));
+        params.add(new BasicNameValuePair("id", post.id.toString()));
+        if(post.parentId != null) {
+            params.add(new BasicNameValuePair("parentId", post.parentId.toString()));
+        }
         return params;
     }
 
@@ -225,22 +223,34 @@ public class RestAPI {
         return params;
     }
 
-    public List<NameValuePair> getAddAttachmentParams(UserObj user, MEDIA_TYPE type) {
+    //    public List<NameValuePair> getAddAttachmentParams(UserObj user, MEDIA_TYPE type) {
+    //        List<NameValuePair> params = getAuthParams(user);
+    //        params.add(new BasicNameValuePair("data[content][attachments][0][type]", type.toString()));
+    //        return params;
+    //    }
+
+    public List<NameValuePair> getNewThumbParams(UserObj user, String postId, String attachId) {
         List<NameValuePair> params = getAuthParams(user);
-        params.add(new BasicNameValuePair("data[content][attachments][0][type]", type.toString()));
-        return params;
-    }
-    
-    public List<NameValuePair> getNewThumbParams(UserObj user, Integer postId, String attachId) {
-        List<NameValuePair> params = getAuthParams(user);
-        params.add(new BasicNameValuePair("postId", postId.toString()));
+        params.add(new BasicNameValuePair("postId", postId));
         params.add(new BasicNameValuePair("attachId", attachId));
         return params;
     }
 
-    public List<NameValuePair> getDelAttachmentParams(UserObj user, String id) {
+    //    public List<NameValuePair> getDelAttachmentParams(UserObj user, String id) {
+    //        List<NameValuePair> params = getAuthParams(user);
+    //        params.add(new BasicNameValuePair("data[content][attachments][0][id]", id));
+    //        return params;
+    //    }
+
+    public List<NameValuePair> getAttachmentParams(UserObj user, AttachObj attachment, String postId) {
         List<NameValuePair> params = getAuthParams(user);
-        params.add(new BasicNameValuePair("data[content][attachments][0][id]", id));
+        params.add(new BasicNameValuePair("data[postId]", postId));
+        if (attachment.type == MEDIA_TYPE.DELETE) {
+            params.add(new BasicNameValuePair("data[content][attachments][0][id]", attachment.id));
+        }
+        else {
+            params.add(new BasicNameValuePair("data[content][attachments][0][type]", attachment.type.toString()));
+        }
         return params;
     }
 
@@ -250,7 +260,7 @@ public class RestAPI {
         params.add(new BasicNameValuePair("password", password));
         return params;
     }
-    
+
     public List<NameValuePair> getFBLoginParams(String id, String username, String email, String token) {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("data[fbId]", id));
@@ -259,7 +269,7 @@ public class RestAPI {
         params.add(new BasicNameValuePair("data[token]", token));
         return params;
     }
-    
+
     public List<NameValuePair> getGPlusLoginParams(String id, String username, String email, String token) {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("data[gPlusId]", id));

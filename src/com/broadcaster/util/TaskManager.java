@@ -96,7 +96,7 @@ public class TaskManager {
 
     public void begin() {
         if(tasks.isEmpty()) {
-            activity.stopLoadingMode();
+            activity.hideProgressOverlay();
         }
         else {
             final TaskItem ti = tasks.poll();
