@@ -1,7 +1,5 @@
 package com.broadcaster;
 
-import java.util.Map;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,21 +15,22 @@ import android.widget.ShareActionProvider;
 import com.broadcaster.model.PostObj;
 import com.broadcaster.model.PostViewHolder;
 import com.broadcaster.model.ResponseObj;
-import com.broadcaster.model.TaskItem;
+import com.broadcaster.task.TaskBase.TaskListener;
+import com.broadcaster.task.TaskManager;
 import com.broadcaster.task.TaskPostDel;
+import com.broadcaster.task.TaskPostLoadBase;
+import com.broadcaster.task.TaskPostLoadByParent;
+import com.broadcaster.task.TaskPostReply;
 import com.broadcaster.util.Constants;
-import com.broadcaster.util.Constants.TASK;
-import com.broadcaster.util.Constants.TASK_RESULT;
-import com.broadcaster.util.DataParser;
-import com.broadcaster.util.TaskManager;
-import com.broadcaster.util.TaskUtil;
+import com.broadcaster.util.Constants.POST_LIST_TYPE;
+import com.google.gson.Gson;
 
 public class ListByParent extends BaseDrawerListActivity {
     private Integer postId;
     private EditText replyText;
     private RelativeLayout replyBox;
     private Button replySubmit;
-    private PostObj post;
+    private PostObj mPost;
 
     protected ShareActionProvider mShareActionProvider;
 
@@ -45,7 +44,8 @@ public class ListByParent extends BaseDrawerListActivity {
             @Override
             public void onClick(View arg0) {
                 if (isLoggedIn()) {
-                    TaskUtil.reply(ListByParent.this, listener);
+                    replyAndLoad();
+                    hideKeyboard();
                 }
                 else {
                     menuLogin();
@@ -55,13 +55,12 @@ public class ListByParent extends BaseDrawerListActivity {
 
         initProgressElements();
         postId = getIntent().getIntExtra("postId", 0);
-        tag = "post"+postId;
+//        tag = "post"+postId;
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        TaskUtil.refreshPosts(this, listener);
+    protected POST_LIST_TYPE getCurrentListType() {
+        return POST_LIST_TYPE.PARENT;
     }
 
     @Override
@@ -92,7 +91,7 @@ public class ListByParent extends BaseDrawerListActivity {
         switch (item.getItemId()) {
         case R.id.menu_edit:
             if(info.position == 0) {
-                updatePost(post);
+                updatePost(mPost);
             }
             else {
                 updatePost((PostObj)postListAdapter.getItem(info.position-1));
@@ -101,8 +100,12 @@ public class ListByParent extends BaseDrawerListActivity {
         case R.id.menu_delete:
             if(info.position == 0) {
                 (new com.broadcaster.task.TaskManager(this))
-                .addTask(new TaskPostDel(post))
-                .exitActivity()
+                .addTask((new TaskPostDel(mPost)).setCallback(new TaskListener() {
+                    @Override
+                    public void postExecute(TaskManager tm, ResponseObj response) {
+                        finish();
+                    }
+                }))
                 .run();
             }
             else {
@@ -125,23 +128,8 @@ public class ListByParent extends BaseDrawerListActivity {
     }
 
     @Override
-    public ResponseObj loadPosts(TaskItem ti, TaskManager mgr) {
-        return api.getPostsByParent(api.getPostsByParentParams(postId));
-    }
-
-    @Override
-    public ResponseObj loadMorePosts(TaskItem ti, TaskManager mgr) {
-        return api.getPostsByParent(api.getAfterParams(api.getPostsByParentParams(getLastId()), postId));
-    }
-
-    @Override
     protected PostViewHolder getHolderInstance() {
         return new CommentViewHolder(this);
-    }
-
-    @Override
-    protected ActivityListTaskListenerBase initTaskListener() {
-        return new ListReplyTaskListener();
     }
 
     @Override
@@ -164,14 +152,6 @@ public class ListByParent extends BaseDrawerListActivity {
         }
     }
 
-    @Override
-    public void setProgressText(TASK task) {
-        super.setProgressText(task);
-        if (footerText != null) {
-            footerText.setText(getTaskMessage(task));
-        }
-    }
-
     private PostObj constructNewPost() {
         PostObj po = new PostObj();
         po.title = replyText.getText().toString();
@@ -179,71 +159,6 @@ public class ListByParent extends BaseDrawerListActivity {
         po.setLocation(pref.getRealLocation());
         po.parentId = postId;
         return po;
-    }
-
-    public class ListReplyTaskListener extends ActivityListTaskListenerBase {
-        @Override
-        public void onExecute(TaskItem ti, TaskManager mgr) {
-            super.onExecute(ti, mgr);
-            ResponseObj response;
-
-            switch(ti.task) {
-            case ADD_REPLY:
-                response = api.newReply(api.getReplyPostParams(pref.getUser(), constructNewPost()));
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            default:
-                break;
-            }
-        }
-
-        @Override
-        public void onPostExecute(TaskItem ti, TaskManager mgr) {
-            super.onPostExecute(ti, mgr);
-
-            ResponseObj response = mgr.getResultRawHTTPResponse();
-            if(response.hasError()) {
-                if(response.getErrorCode().equals(Constants.API_ERRORS.RESOURCE_NOT_FOUND)) {
-                    showError(this+":onPostExecute", response.getError());
-                    finish();
-                }
-                if(response.getErrorCode().equals(Constants.API_ERRORS.REQUIRE_LOGIN)) {
-                    mgr.tasks.clear();
-                    menuLogin();
-                }
-            }
-            else {
-                switch(ti.task) {
-                case LOAD_POSTS:
-                    post = DataParser.parsePost(response);
-                    if (post.id == null) {
-                        showError(this.toString(), "Post not found.");
-                        finish();
-                        return;
-                    }
-                    if (headerViewHolder != null) {
-                        postListView.removeHeaderView(headerViewHolder.post);
-                    }
-                    headerViewHolder = new ReplyPostViewHolder(ListByParent.this);
-                    headerViewHolder.renderPost(post);
-                    headerViewHolder.makeOP();
-                    postListView.addHeaderView(headerViewHolder.post);
-
-                    Intent sendIntent = new Intent();
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, post.getUrl());
-                    sendIntent.setType("text/plain");
-                    mShareActionProvider.setShareIntent(sendIntent);
-                    break;
-                case ADD_REPLY:
-                    replyText.setText(null);
-                    hideKeyboard();
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
     }
 
     public class CommentViewHolder extends PostViewHolder {
@@ -278,8 +193,58 @@ public class ListByParent extends BaseDrawerListActivity {
         }
     }
 
+    public void loadHeaderPost(PostObj p) {
+        mPost = p;
+        if (mPost.id == null) {
+            showError(this.toString(), "Post not found.");
+            finish();
+            return;
+        }
+
+        if (headerViewHolder != null) {
+            postListView.removeHeaderView(headerViewHolder.post);
+        }
+        headerViewHolder = new ReplyPostViewHolder(ListByParent.this);
+        headerViewHolder.renderPost(mPost);
+        headerViewHolder.makeOP();
+        postListView.addHeaderView(headerViewHolder.post);
+
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, mPost.getUrl());
+        sendIntent.setType("text/plain");
+        mShareActionProvider.setShareIntent(sendIntent);
+    }
+
     @Override
-    public void exitActivity(Map<TASK_RESULT, Object> results) {
-        finish();
+    protected TaskPostLoadBase getLoadPostTask() {
+        return (TaskPostLoadBase) (new TaskPostLoadByParent(postId)).setCallback(new TaskListener() {
+            @Override
+            public void postExecute(TaskManager tm, ResponseObj response) {
+                if(response.getErrorCode().equals(Constants.API_ERRORS.RESOURCE_NOT_FOUND)) {
+                    finish();
+                }
+                else {
+                    PostObj post = (new Gson()).fromJson(response.data.get("post"), PostObj.class);
+                    loadHeaderPost(post);
+                }
+            }
+        });
+    }
+
+    protected void replyAndLoad() {
+        (new com.broadcaster.task.TaskManager(ListByParent.this))
+        .addTask((new TaskPostReply(constructNewPost())).setCallback(new TaskListener() {
+            @Override
+            public void postExecute(TaskManager tm, ResponseObj response) {
+                if(response.getErrorCode().equals(Constants.API_ERRORS.REQUIRE_LOGIN)) {
+                    menuLogin();
+                }
+                replyText.setText(null);
+            }
+        }))
+        .addTask((new TaskPostLoadByParent(postId)).setAfterId(getLastId()))
+        .showProgressAction()
+        .run();
     }
 }

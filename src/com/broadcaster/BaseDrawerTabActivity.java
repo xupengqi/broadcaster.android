@@ -11,10 +11,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 
-import com.broadcaster.R;
 import com.broadcaster.fragment.BaseFragment;
 import com.broadcaster.util.PagerAdapterBase;
-import com.broadcaster.util.Constants.TASK;
 
 public class BaseDrawerTabActivity extends BaseDrawerActivity {
     protected ViewPager mViewPager;
@@ -70,14 +68,6 @@ public class BaseDrawerTabActivity extends BaseDrawerActivity {
 
     public void onPageSelected(int position) {
         getActionBar().setSelectedNavigationItem(position);
-    }
-
-    @Override
-    public void setProgressText(TASK task) {
-        if (currentFragments != null) {
-            BaseFragment fragment = (BaseFragment) currentFragments.get(mViewPager.getCurrentItem());
-            fragment.setProgressText(getTaskMessage(task));
-        }
     }
 
     @Override

@@ -78,7 +78,7 @@ public class PostEdit extends PostNew {
         tm.addTask(new TaskPostUpdate(constructNewPost()))
         .addTask(attachmentTasks)
         .showProgressOverlay()
-        .exitActivity()
+        .setCallback(getSubmitCallback())
         .run();
     }
 

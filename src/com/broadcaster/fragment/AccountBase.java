@@ -47,9 +47,4 @@ public class AccountBase extends BaseFragment {
         submit.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void setProgressText(CharSequence taskMessage) {
-        //loginProgressText.setText(taskMessage);
-    }
-
 }

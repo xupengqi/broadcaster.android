@@ -28,9 +28,11 @@ import android.widget.TextView.OnEditorActionListener;
 import com.broadcaster.BaseActivity;
 import com.broadcaster.R;
 import com.broadcaster.model.GeocodeResponse;
-import com.broadcaster.model.LocationObj;
-import com.broadcaster.model.TaskItem;
 import com.broadcaster.model.GeocodeResponse.GRAddress;
+import com.broadcaster.model.LocationObj;
+import com.broadcaster.model.ResponseObj;
+import com.broadcaster.model.TaskItem;
+import com.broadcaster.task.TaskGetLocation;
 import com.broadcaster.util.LocationUtil;
 import com.broadcaster.util.TaskListener;
 import com.broadcaster.util.TaskManager;
@@ -118,7 +120,7 @@ public class LocationSettings extends LinearLayout {
             @Override
             public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event) {
                 if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
-                    getLocation();
+                    getAddress();
                     return true;
                 }    
                 return false;
@@ -129,13 +131,13 @@ public class LocationSettings extends LinearLayout {
             public void onClick(View arg0) {
                 //TODO: SHOW ACTIONBAR PROGRESS
                 BaseActivity.pref.clearRealLocation();
-                TaskUtil.getRealLocation(activity, new LocationSettingsListener());
+                getLocation();
             }
         });
         addLocationButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                getLocation();
+                getAddress();
             }
         });
 
@@ -176,7 +178,20 @@ public class LocationSettings extends LinearLayout {
         }
 
         activity.registerForContextMenu(addLocationText);
-        TaskUtil.getRealLocation(activity, new LocationSettingsListener());
+        getLocation();
+    }
+
+    protected void getLocation() {
+        (new com.broadcaster.task.TaskManager(activity))
+        .addTask(new TaskGetLocation().setCallback(new com.broadcaster.task.TaskBase.TaskListener() {
+            @Override
+            public void postExecute(com.broadcaster.task.TaskManager tm, ResponseObj response) {
+                LocationObj loc = BaseActivity.pref.getRealLocation();
+                currentLocationSelect.setText(loc.name);
+            }
+        }))
+        .showProgressAction()
+        .run();
     }
 
     private void checkCurrentLocation() {
@@ -203,12 +218,18 @@ public class LocationSettings extends LinearLayout {
         selectedLocation = button;
     }
 
-    private void getLocation() {
+    private void getAddress() {
         String address = addLocationText.getText().toString();
         if (address.length() > 2) {
             //TODO: SHOW ACTION BAR PROGRESS
             TaskUtil.getAddress(activity, new LocationSettingsListener(), address);
         }
+    }
+
+    public void onGetRealLocation() {
+        LocationObj loc = BaseActivity.pref.getRealLocation();
+        currentLocationSelect.setText(loc.name);
+        //TODO: HIDE ACTIONBAR PROGRESS
     }
 
     public void addLocation(String addressLine, double latitude, double longitude) {
@@ -260,12 +281,6 @@ public class LocationSettings extends LinearLayout {
             }
         });
         savedLocationsGroup.addView(locationItemView);
-    }
-
-    public void onGetRealLocation() {
-        LocationObj loc = BaseActivity.pref.getRealLocation();
-        currentLocationSelect.setText(loc.name);
-        //TODO: HIDE ACTIONBAR PROGRESS
     }
 
     public class LocationSettingsListener extends TaskListener {
@@ -323,9 +338,6 @@ public class LocationSettings extends LinearLayout {
                     }
                 }
                 //TODO: HIDE ACTIONBAR PROGRESS
-                break;
-            case GET_REAL_LOCATION:
-                onGetRealLocation();
                 break;
             default:
                 break;

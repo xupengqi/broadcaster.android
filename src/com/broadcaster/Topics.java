@@ -12,12 +12,11 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 
-import com.broadcaster.R;
-import com.broadcaster.model.TaskItem;
+import com.broadcaster.model.ResponseObj;
+import com.broadcaster.task.TaskBase.TaskListener;
+import com.broadcaster.task.TaskGetTopics;
+import com.broadcaster.task.TaskManager;
 import com.broadcaster.util.TagsListAdapter;
-import com.broadcaster.util.TaskListener;
-import com.broadcaster.util.TaskManager;
-import com.broadcaster.util.TaskUtil;
 
 public class Topics extends BaseDrawerActivity {
     protected Fragment fragment;
@@ -27,7 +26,7 @@ public class Topics extends BaseDrawerActivity {
         super.onCreate(savedInstanceState);
 
         initProgressElements();
-        TaskUtil.getAllTags(this, new ActivityTopicsTaskListener());
+        refreshTopics();
     }
 
     @Override
@@ -42,12 +41,28 @@ public class Topics extends BaseDrawerActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_refresh:
-            pref.clearAllTags();
-            TaskUtil.getAllTags(this, new ActivityTopicsTaskListener());
+            refreshTopics();
             return true;
         default:
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected int getContentView() {
+        return R.layout.activity_topics;
+    }
+
+    private void refreshTopics() {
+        (new com.broadcaster.task.TaskManager(this))
+        .addTask((new TaskGetTopics()).setCallback(new TaskListener() {
+            @Override
+            public void postExecute(TaskManager tm, ResponseObj response) {
+                renderTags();
+            }
+        }))
+        .showProgressAction()
+        .run();
     }
 
     protected void renderTags() {
@@ -79,24 +94,5 @@ public class Topics extends BaseDrawerActivity {
 
         TagsListAdapter arrayAdapter = new TagsListAdapter(this, tagsList, headerTag, pref.getAllTags().split(","));
         tagsList.setAdapter(arrayAdapter);
-    }
-
-    public class ActivityTopicsTaskListener extends TaskListener {
-        @Override
-        public void onPostExecute(TaskItem ti, TaskManager mgr) {
-            super.onPostExecute(ti, mgr);
-            switch(ti.task) {
-            case GET_TAGS:
-                renderTags();
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    @Override
-    protected int getContentView() {
-        return R.layout.activity_topics;
     }
 }

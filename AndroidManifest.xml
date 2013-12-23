@@ -52,7 +52,7 @@
             android:theme="@style/activity_cab_style" >
         </activity>
         <activity
-            android:name="com.broadcaster.ListStarred"
+            android:name="com.broadcaster.ListById"
             android:label="@string/title_activity_starred"
             android:theme="@style/activity_cab_style" >
         </activity>

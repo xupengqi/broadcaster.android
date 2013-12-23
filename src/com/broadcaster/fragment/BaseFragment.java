@@ -29,6 +29,4 @@ public abstract class BaseFragment extends Fragment {
     public void startLoadingMode() { }
 
     public void stopLoadingMode() { }
-
-    public void setProgressText(CharSequence taskMessage) { }
 }

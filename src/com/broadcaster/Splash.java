@@ -65,8 +65,8 @@ public class Splash extends BaseActivity {
 
             switch(ti.task) {
             case SPLASH_PREPARE:
-                mgr.addTask(TASK.GET_TAGS)
-                .addTask(TASK.SPLASH_FINISH);
+//                mgr.addTask(TASK.GET_TAGS)
+//                .addTask(TASK.SPLASH_FINISH);
                 /*if (!pref.hasSelectedTags()) {
                     mgr.addTask(TASK.GET_TAGS)
                     .addTask(TASK.SPLASH_SETUP);

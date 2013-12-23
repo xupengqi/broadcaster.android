@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 
 import android.content.Intent;
@@ -38,19 +37,19 @@ import com.broadcaster.model.AttachObj;
 import com.broadcaster.model.AttachObj.AttachmentInteractListener;
 import com.broadcaster.model.PostObj;
 import com.broadcaster.model.ResponseObj;
-import com.broadcaster.model.TaskItem;
-import com.broadcaster.task.TaskBase;
 import com.broadcaster.task.TaskAttachmentDel;
 import com.broadcaster.task.TaskAttachmentNew;
+import com.broadcaster.task.TaskBase;
+import com.broadcaster.task.TaskBase.TaskListener;
+import com.broadcaster.task.TaskGetLocation;
+import com.broadcaster.task.TaskGetTopics;
+import com.broadcaster.task.TaskManager;
 import com.broadcaster.task.TaskPostNew;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
 import com.broadcaster.util.Constants.TASK_RESULT;
 import com.broadcaster.util.ImageUtil;
 import com.broadcaster.util.PathUtil;
-import com.broadcaster.util.TaskListener;
-import com.broadcaster.util.TaskManager;
-import com.broadcaster.util.TaskUtil;
 import com.broadcaster.util.Util;
 import com.broadcaster.view.AudioCaptureButton;
 import com.broadcaster.view.AudioCaptureButton.OnNewCaptureListener;
@@ -143,7 +142,21 @@ public class PostNew extends BaseDrawerActivity {
         attachImage.setOnClickListener(openContext);
         attachVideo.setOnClickListener(openContext);
         initProgressElements();
-        TaskUtil.getRealLocation(this, new NewPostTaskListener());
+        (new com.broadcaster.task.TaskManager(this))
+        .addTask((new TaskGetLocation()).setCallback(new TaskListener() {
+            @Override
+            public void postExecute(TaskManager tm, ResponseObj response) {
+                locationText.setText(pref.getRealLocation().name);
+            }
+        }))
+        .addTask((new TaskGetTopics()).setCallback(new TaskListener() {
+            @Override
+            public void postExecute(TaskManager tm, ResponseObj response) {
+                refreshTopics("default"); // TODO: WILL THIS REFRESH THE LIST AGAIN? IMPLEMENT REFERSH BUTTON FOR TAG AND LOCATION?
+            }
+        }))
+        .showProgressAction()
+        .run();
     }
 
     public void refreshTopics(String selected) {
@@ -223,12 +236,24 @@ public class PostNew extends BaseDrawerActivity {
     }
 
     protected void submitPost(Queue<TaskBase> attachmentTasks) {
-        com.broadcaster.task.TaskManager tm = new com.broadcaster.task.TaskManager(PostNew.this);
-        tm.addTask(new TaskPostNew(constructNewPost()))
+        (new com.broadcaster.task.TaskManager(PostNew.this))
+        .addTask(new TaskPostNew(constructNewPost()))
         .addTask(attachmentTasks)
+        .setCallback(getSubmitCallback())
         .showProgressOverlay()
-        .exitActivity()
         .run();
+    }
+
+    protected TaskListener getSubmitCallback() {
+        return new TaskListener() {
+            @Override
+            public void postExecute(TaskManager tm, ResponseObj response) {
+                Intent intent = new Intent(PostNew.this, ListByParent.class);
+                intent.putExtra("postId", Integer.parseInt(tm.getResult(TASK_RESULT.POSTID).toString()));
+                startActivity(intent);
+                finish();
+            }
+        };
     }
 
     @Override
@@ -427,37 +452,6 @@ public class PostNew extends BaseDrawerActivity {
         return list.size() > 0;
     }
 
-    @Override
-    public void onGetRealLocation() {
-        super.onGetRealLocation();
-        locationText.setText(pref.getRealLocation().name);
-    }
-
-    public class NewPostTaskListener extends TaskListener {
-
-        @Override
-        public void onPostExecute(TaskItem ti, TaskManager mgr) {
-            super.onPostExecute(ti, mgr);
-            ResponseObj response = mgr.getResultRawHTTPResponse();
-
-            if(response.hasError()) {
-                showError("PostNew:postExecuteTask:"+ti.task, response.getError());
-                mgr.tasks.clear();
-                return;
-            }
-
-            switch(ti.task){
-            case GET_TAGS:
-                //ArrayAdapter<String> tagsAdapter = new ArrayAdapter<String>(PostNew.this, android.R.layout.simple_dropdown_item_1line, pref.getAllTags().split(","));
-                //final AutoCompleteTextView tags = (AutoCompleteTextView) findViewById(R.id.post_new_tag);
-                //tags.setAdapter(tagsAdapter);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
     public PostObj constructNewPost() {
         PostObj po = new PostObj();
         po.title = postTitle.getText().toString();
@@ -470,13 +464,5 @@ public class PostNew extends BaseDrawerActivity {
 
     protected void removeAttachmentView(View v) {
         ((LinearLayout)v.getParent().getParent()).removeView((LinearLayout)v.getParent());
-    }
-
-    @Override
-    public void exitActivity(Map<TASK_RESULT, Object> results) {
-        Intent intent = new Intent(PostNew.this, ListByParent.class);
-        intent.putExtra("postId", Integer.parseInt(results.get(TASK_RESULT.POSTID).toString()));
-        startActivity(intent);
-        finish();
     }
 }

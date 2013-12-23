@@ -17,11 +17,9 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.broadcaster.model.LocationObj;
 import com.broadcaster.util.AccountTaskListener;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.TASK;
-import com.broadcaster.util.Constants.TASK_RESULT;
 import com.broadcaster.util.PrefUtil;
 import com.broadcaster.util.RestAPI;
 import com.broadcaster.util.TaskUtil;
@@ -50,7 +48,7 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
     public ConnectionResult mConnectionResult;
     public static final int REQUEST_CODE_RESOLVE_ERR = 9000;
 
-    public LocationObj location;
+//    public LocationObj location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,7 +196,7 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
     public void menuStarred() {
         Map<String, String> extras = new HashMap<String, String>();
         extras.put("postIds", StringUtils.join(pref.getStarred(),","));
-        startSingleTopActivity(ListStarred.class, extras, true);
+        startSingleTopActivity(ListById.class, extras, true);
     }
 
     public void menuTopics() {
@@ -305,31 +303,23 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
         Toast.makeText(this, toast, Toast.LENGTH_LONG).show();
     }
 
-    public void onGetLocation() { }
-
-    public void onGetRealLocation() { }
+//    public void onGetRealLocation() { }
 
     protected CharSequence getTaskMessage(TASK task) {
         switch(task) {
-        case GET_TAGS:
-            return "Getting all tags from server...";
-        case GET_LOCATION:
-        case GET_REAL_LOCATION:
-            return "Getting location...";
-        case LOAD_POSTS:
-            return "Getting new posts...";
-        case LOAD_POSTS_FROM_CACHE:
-            return "Loading posts from cache...";
-        case LOAD_MORE_POSTS:
-            return "Getting new posts...";
-        /*case ADD_POST:
-            return "Creating post...";*/
-//        case ADD_ATTACHMENT:
-//            return "Uploading attachment...";
+//        case GET_TAGS:
+//            return "Getting all tags from server...";
+//        case GET_LOCATION:
+//        case GET_REAL_LOCATION:
+//            return "Getting location...";
+//        case LOAD_POSTS:
+//            return "Getting new posts...";
+//        case LOAD_POSTS_FROM_CACHE:
+//            return "Loading posts from cache...";
+//        case LOAD_MORE_POSTS:
+//            return "Getting new posts...";
         case LOGIN:
             return "Authenticating with server...";
-        case SHOW_PROGRESS:
-//        case FINISH:
         case DOWNLOAD:
             return "";
         default:
@@ -402,20 +392,11 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
         throw new UnsupportedOperationException();
     }
 
-    //TODO: REMOVE
-    public void setProgressText(TASK task) {
-        throw new UnsupportedOperationException();
-    }
-
     public void setProgressText(String text) {
         throw new UnsupportedOperationException();
     }
     
     public void setProgressImage(Bitmap image) {
-        throw new UnsupportedOperationException();
-    }
-    
-    public void exitActivity(Map<TASK_RESULT, Object> results) {
         throw new UnsupportedOperationException();
     }
 

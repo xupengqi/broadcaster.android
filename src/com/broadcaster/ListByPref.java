@@ -5,17 +5,14 @@ import java.util.List;
 import android.os.Bundle;
 import android.view.Menu;
 
-import com.broadcaster.model.PostObj;
-import com.broadcaster.model.ResponseObj;
-import com.broadcaster.model.TaskItem;
+import com.broadcaster.task.TaskPostLoadBase;
+import com.broadcaster.task.TaskPostLoadByTopic;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.DRAWER_ITEMS;
-import com.broadcaster.util.TaskManager;
-import com.broadcaster.util.TaskUtil;
-import com.broadcaster.util.Util;
+import com.broadcaster.util.Constants.POST_LIST_TYPE;
 
 public class ListByPref extends BaseDrawerListActivity {
-//    private TextView header2;
+    //    private TextView header2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,10 +24,12 @@ public class ListByPref extends BaseDrawerListActivity {
         //header2 = (TextView) listHeader.findViewById(R.id.list_header_2);
         //header1.setText(getTagText(pref.getSelectedTags()));
         //postListView.addHeaderView(listHeader);
+        //currentLocation = pref.getViewingLocation().name;
+        //header2.setText("near "+currentLocation);
         initProgressElements();
         //showLocations = true;
         //renderActionBarLocations();
-        
+
         /*if (pref.justInstalled()) {
             menuHelp();
         }*/
@@ -42,29 +41,8 @@ public class ListByPref extends BaseDrawerListActivity {
     }
 
     @Override
-    public void onGetLocation() {
-        // refresh currentPosts if tag set has changed or location is changed
-        // use empty string for everything
-        if (!pref.getSelectedTags().equals(tag) || pref.getViewingLocation() == null || !currentLocation.equals(pref.getViewingLocation().name)) {
-            currentLocation = pref.getViewingLocation().name;
-            tag = pref.getSelectedTags();
-            List<PostObj> cachedPosts = pref.getPosts(tag, currentLocation);
-            if (cachedPosts.size() > 0) {
-                Util.debug(this, "Rendering from cached posts for tags ["+tag+"] @ ["+location.name+"]");
-                TaskUtil.refreshPostsFromCache(this, listener);
-            }
-            else {
-                Util.debug(this, "Refreshing posts.");
-                TaskUtil.loadPosts(this, listener);
-            }
-//            header2.setText("near "+currentLocation);
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        TaskUtil.getViewingLocation(this, listener);
+    protected POST_LIST_TYPE getCurrentListType() {
+        return POST_LIST_TYPE.PREF;
     }
 
     @Override
@@ -83,12 +61,7 @@ public class ListByPref extends BaseDrawerListActivity {
     }
 
     @Override
-    public ResponseObj loadPosts(TaskItem ti, TaskManager mgr) {
-        return api.getPostsByLocation(api.getPostsByLocationParams(location, pref.getRadiusInKm(), tag));
-    }
-
-    @Override
-    public ResponseObj loadMorePosts(TaskItem ti, TaskManager mgr) {
-        return api.getPostsByLocation(api.getAfterParams(api.getPostsByLocationParams(location, pref.getRadiusInKm(), tag), getLastId()));
+    protected TaskPostLoadBase getLoadPostTask() {
+        return new TaskPostLoadByTopic(pref.getViewingLocation(), pref.getRadiusInKm(), pref.getSelectedTags());
     }
 }

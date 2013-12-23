@@ -31,23 +31,22 @@ import com.broadcaster.model.PostObj;
 import com.broadcaster.model.PostViewHolder;
 import com.broadcaster.model.ResponseObj;
 import com.broadcaster.model.TaskItem;
+import com.broadcaster.task.TaskGetLocation;
+import com.broadcaster.task.TaskGetTopics;
 import com.broadcaster.task.TaskPostDel;
+import com.broadcaster.task.TaskPostLoadBase;
 import com.broadcaster.task.TaskPostUnDel;
 import com.broadcaster.util.Constants;
-import com.broadcaster.util.Constants.TASK;
-import com.broadcaster.util.Constants.TASK_RESULT;
-import com.broadcaster.util.DataParser;
+import com.broadcaster.util.Constants.POST_LIST_TYPE;
 import com.broadcaster.util.TaskListener;
 import com.broadcaster.util.TaskManager;
-import com.broadcaster.util.TaskUtil;
 import com.broadcaster.util.Util;
 import com.broadcaster.view.ListViewWithOverScroll;
 import com.broadcaster.view.ListViewWithOverScroll.OnOverScrollActionListener;
 
 public class BaseDrawerListActivity extends BaseDrawerActivity {
-    protected String tag;
+    protected POST_LIST_TYPE mListType;
     protected String currentLocation;
-    protected ActivityListTaskListenerBase listener;
     protected List<PostObj> currentPosts;
     protected ArrayAdapter<PostObj> postListAdapter;
     protected ListViewWithOverScroll postListView;
@@ -56,17 +55,17 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     protected LinearLayout footerProgress;
     protected TextView footerText;
     protected Button footerButton;
-//    protected Spinner locations;
-//    protected List<String> locationNames;
-//    protected ArrayAdapter<String> locationsAdapter;
-//    protected int viewingLocationPosition;
+    //    protected Spinner locations;
+    //    protected List<String> locationNames;
+    //    protected ArrayAdapter<String> locationsAdapter;
+    //    protected int viewingLocationPosition;
 
     protected Spinner topicsSpinner;
     protected ArrayAdapter<String> topicsSpinnerAdapter;
     protected List<String> topicSpinnerItems;
     protected boolean spinnerCreated;
     protected boolean haveMoreToLoad = true;
-//    protected boolean showLocations = false;
+    //    protected boolean showLocations = false;
 
     private ProgressBar actionBarProgressBar;
     private TextView actionBarProgressText;
@@ -74,8 +73,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        listener = initTaskListener();
 
         // setup listview
         postListView = (ListViewWithOverScroll)findViewById(R.id.posts);
@@ -128,20 +125,19 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             @Override
             public void onOverScrollReload() {
                 postListView.disableOnTouch();
-                contextualActionBarDo();
-                TaskUtil.refreshPostsAndFinish(BaseDrawerListActivity.this, listener);
+                refreshPosts(); //TODO: CALLING THIS WILL CALL showProgressAction AGAIN WHICH IS ALREADY CALLED IN onOverScrollStart
             }
 
             @Override
             public void onOverScrollLoadMore() {
                 if (haveMoreToLoad) {
-                    TaskUtil.loadMorePosts(BaseDrawerListActivity.this, listener);
+                    loadMorePosts();
                 }
             }
 
             @Override
             public void onOverScrollStart() {
-                contextualActionBarStart();
+                showProgressAction();
             }
 
             @Override
@@ -159,23 +155,24 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         registerForContextMenu(postListView);
         getActionBar().setTitle("");
 
-//        locationNames = new ArrayList<String>();
+        //        locationNames = new ArrayList<String>();
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        loadPosts();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-//        if (locations != null) {
-//            updateLocations();
-//            locationsAdapter.notifyDataSetChanged();
-//            viewingLocationPosition = translateFromViewingPosition(pref.getViewingLocationPosition());
-//            locations.setSelection(viewingLocationPosition);
-//        }
+        //        if (locations != null) {
+        //            updateLocations();
+        //            locationsAdapter.notifyDataSetChanged();
+        //            viewingLocationPosition = translateFromViewingPosition(pref.getViewingLocationPosition());
+        //            locations.setSelection(viewingLocationPosition);
+        //        }
     }
 
     /*protected void renderActionBarLocations() {
@@ -220,7 +217,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        if (!(this instanceof ListByParent)) {
+        if (!(this instanceof ListByParent) && !(this instanceof ListByUser)) {
             MenuItem topicsMenuItem = menu.findItem(R.id.menu_go_to_topic);
             topicsSpinner = (Spinner)topicsMenuItem.getActionView().findViewById(R.id.simple_spinner);
             topicsSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, topicSpinnerItems);
@@ -266,7 +263,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
                 public void onNothingSelected(AdapterView<?> arg0) { }
             });
 
-            //initTopicsSpinnerItems();
+            refreshTopicsSpinner();
         }
         return true;
     }
@@ -315,7 +312,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             (new com.broadcaster.task.TaskManager(this))
             .addTask(new TaskPostDel(postToDelete))
             .run();
-            
+
             updatePostsList();
             return true;
         default:
@@ -327,7 +324,8 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_refresh:
-            TaskUtil.refreshPostsAndStarAndFinish(BaseDrawerListActivity.this, listener);
+            refreshPosts();
+//            TaskUtil.refreshPostsAndStarAndFinish(BaseDrawerListActivity.this, listener);
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -339,7 +337,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         return R.layout.activity_list;
     }
 
-    protected void initTopicsSpinnerItems() {
+    protected void refreshTopicsSpinner() {
         topicSpinnerItems.clear();
         topicSpinnerItems.add(Constants.SYSTEM_TOPICS.Homepage.toString());
         topicSpinnerItems.add(Constants.SYSTEM_TOPICS.Starred.toString());
@@ -351,10 +349,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         for (String topic : topics) {
             topicSpinnerItems.add(topic);
         }    
-    }
-
-    protected void refreshTopicsSpinner() {
-        initTopicsSpinnerItems();
         invalidateOptionsMenu();
     }
 
@@ -378,7 +372,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             @Override
             public void onClick(View arg0) {
                 loadingMore();
-                TaskUtil.loadMorePosts(BaseDrawerListActivity.this, listener);
+                loadMorePosts();
             }
         });
     }
@@ -392,6 +386,24 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         return new PostViewHolder(this);
     }
 
+    public void updatePostsList(List<PostObj> loadedPosts, boolean append, boolean saveToCache) {
+        if (!append) {
+            currentPosts.clear();
+        }
+        currentPosts.addAll(loadedPosts);
+        if(currentPosts.size() < Constants.POST_PAGE_SIZE) {
+            haveMoreToLoad = false;
+            noMoreToLoad();
+        }
+        else {
+            haveMoreToLoad = true;
+            if (!append) {
+                loadingMore();
+            }
+        }
+        updatePostsList(saveToCache);
+    }
+
     protected void updatePostsList() {
         updatePostsList(true);
     }
@@ -399,7 +411,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     protected void updatePostsList(boolean saveToCache) {
         postListAdapter.notifyDataSetChanged();
         if (saveToCache) {
-            pref.setPosts(tag, location.name, currentPosts);
+            pref.setPosts(mListType, currentPosts);
         }
     }
 
@@ -409,7 +421,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         i.putExtra("postObj", (Serializable)post);
         startActivityForResult(i, 0);
     }
-    
+
     public void undoDelete(PostObj post) {
         post.deleted = false;
         (new com.broadcaster.task.TaskManager(this))
@@ -420,110 +432,19 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     }
 
     public class ActivityListTaskListenerBase extends TaskListener {
-        @Override
-        public void onExecute(TaskItem ti, TaskManager mgr) {
-            super.onExecute(ti, mgr);
-
-            ResponseObj response;
-
-            switch(ti.task) {
-            case LOAD_POSTS:
-                response = loadPosts(ti, mgr);
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            case LOAD_MORE_POSTS:
-                response = loadMorePosts(ti, mgr);
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            default:
-                break;
-            }
-
-            super.onExecute(ti, mgr);
-        }
 
         @Override
         public void onPostExecute(TaskItem ti, TaskManager mgr) {
             super.onPostExecute(ti, mgr);
 
             ResponseObj response = mgr.getResultRawHTTPResponse();
-            ArrayList<PostObj> loadedPosts = new ArrayList<PostObj>();
 
             if(response.hasError()) {
                 showError(this+":onPostExecute", response.getError());
             }
             else {
-                switch(ti.task) {
-                case LOAD_POSTS:
-                    loadedPosts = DataParser.parsePosts(response);
-                    currentPosts.clear();
-                    currentPosts.addAll(loadedPosts);
-                    if(loadedPosts.size() < Constants.POST_PAGE_SIZE) {
-                        haveMoreToLoad = false;
-                        noMoreToLoad();
-                    }
-                    else {
-                        haveMoreToLoad = true;
-                        loadingMore();
-                    }
-                    updatePostsList();
-                    break;
-                case LOAD_POSTS_FROM_CACHE:
-                    currentPosts.clear();
-                    currentPosts.addAll(pref.getPosts(tag, location.name));
-                    if(loadedPosts.size() < Constants.POST_PAGE_SIZE) {
-                        haveMoreToLoad = false;
-                        noMoreToLoad();
-                    }
-                    else {
-                        haveMoreToLoad = true;
-                        loadingMore();
-                    }
-                    updatePostsList(false);
-                    break;
-                case LOAD_MORE_POSTS:
-                    loadedPosts = DataParser.parsePosts(response);
-                    currentPosts.addAll(loadedPosts);
-                    if(loadedPosts.size() < Constants.POST_PAGE_SIZE) {
-                        haveMoreToLoad = false;
-                        noMoreToLoad();
-                    }
-                    else {
-                        haveMoreToLoad = true;
-                    }
-                    updatePostsList();
-                    break;
-                case START_LOADING_ACTION:
-                    contextualActionBarStart();
-                    contextualActionBarDo();
-                    break;
-                case STOP_LOADING_ACTION:
-                    contextualActionBarFinish();
-                    break;
-                case GET_TAGS:
-                    refreshTopicsSpinner();
-                    break;
-                default:
-                    break;
-                }
             }
         }
-    }
-
-    protected ResponseObj loadPosts(TaskItem ti, TaskManager mgr) {
-        throw new UnsupportedOperationException();
-    }
-
-    protected ResponseObj loadMorePosts(TaskItem ti, TaskManager mgr) {
-        throw new UnsupportedOperationException();
-    }
-
-    protected String getCurrentTopic() {
-        throw new UnsupportedOperationException();
-    }
-
-    protected ActivityListTaskListenerBase initTaskListener() {
-        return new ActivityListTaskListenerBase();
     }
 
     protected int getLastId() {
@@ -534,60 +455,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         return lastId;
     }
 
-    public void contextualActionBarStart() {
-        getActionBar().setCustomView(R.layout.module_cab);
-        getActionBar().setDisplayShowHomeEnabled(false);
-        getActionBar().setDisplayShowCustomEnabled(true);
-//      getActionBar().setDisplayShowTitleEnabled(false);
-        reloadStart = true;
-        invalidateOptionsMenu(); // this will call onPrepareOptionsMenu()
-        actionBarProgressBar = (ProgressBar) getActionBar().getCustomView().findViewById(R.id.action_bar_progress);
-        actionBarProgressText = (TextView) getActionBar().getCustomView().findViewById(R.id.action_bar_text);
-    }
-
-    private void contextualActionBarDo() {
-        actionBarProgressText.setText("Reloading...");
-        actionBarProgressBar.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        actionBarProgressBar.setIndeterminate(true);
-    }
-
-    public void contextualActionBarFinish() {
-        contextualActionBarCancel();
-        actionBarProgressText.setText(R.string.action_bar_swipe);
-        actionBarProgressBar.setIndeterminate(false);
-        postListView.enableOnTouch();
-    }
-
-    private void contextualActionBarCancel() {
-//        getActionBar().setDisplayShowTitleEnabled(true);
-//        if (!showLocations) {
-//            getActionBar().setDisplayShowCustomEnabled(false);
-//        }
-//        if (showLocations) {
-//            renderActionBarLocations();
-//        }
-        reloadStart = false;
-        getActionBar().setDisplayShowCustomEnabled(false);
-        getActionBar().setDisplayShowHomeEnabled(true);
-        invalidateOptionsMenu();
-    }
-
-//    protected int translateToViewingPosition(int arg2) {
-//        if (arg2 == 0) {
-//            return -1;
-//        }
-//        else {
-//            return arg2-1;
-//        }
-//    }
-
-//    private int translateFromViewingPosition(Integer viewingLocationPosition) {
-//        if (viewingLocationPosition >= 0) {
-//            return viewingLocationPosition+1;
-//        }
-//        return 0;
-//    }
-
     // TODO: LINE actionBarProgressText.setText(getTaskMessage(task)); 
     //10-27 19:05:00.762: E/AndroidRuntime(30769): Caused by: android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
     //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.BaseDrawerListActivity.setProgressText(BaseDrawerListActivity.java:347)
@@ -597,22 +464,12 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager$TaskRunner.doInBackground(TaskManager.java:156)
     //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager$TaskRunner.doInBackground(TaskManager.java:1)
     @Override
-    public void setProgressText(TASK task) {
-        super.setProgressText(task);
-        if (footerText != null) {
-            footerText.setText(getTaskMessage(task));
-        }
-        if (actionBarProgressText != null) {
-            actionBarProgressText.setText(getTaskMessage(task));
-        }
-    }
-    
-    @Override
     public void setProgressText(String text) {
         super.setProgressText(text);
         if (footerText != null) {
             footerText.setText(text);
         }
+        //TODO: BaseDrawerTabAtivity should also have action bar progress?
         if (actionBarProgressText != null) {
             actionBarProgressText.setText(text);
         }
@@ -620,13 +477,92 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
 
     @Override
     public void showProgressAction() {
-        contextualActionBarStart();
+        getActionBar().setCustomView(R.layout.module_cab);
+        getActionBar().setDisplayShowHomeEnabled(false);
+        getActionBar().setDisplayShowCustomEnabled(true);
+        //getActionBar().setDisplayShowTitleEnabled(false);
+        reloadStart = true;
+        invalidateOptionsMenu(); // this will call onPrepareOptionsMenu()
+        actionBarProgressText = (TextView) getActionBar().getCustomView().findViewById(R.id.action_bar_text);
+        actionBarProgressBar = (ProgressBar) getActionBar().getCustomView().findViewById(R.id.action_bar_progress);
         actionBarProgressBar.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         actionBarProgressBar.setIndeterminate(true);
     }
 
+    private void contextualActionBarCancel() {
+        //getActionBar().setDisplayShowTitleEnabled(true);
+        //if (!showLocations) {
+        //    getActionBar().setDisplayShowCustomEnabled(false);
+        //}
+        //if (showLocations) {
+        //    renderActionBarLocations();
+        //}
+        reloadStart = false;
+        getActionBar().setDisplayShowCustomEnabled(false);
+        getActionBar().setDisplayShowHomeEnabled(true);
+        actionBarProgressBar.setIndeterminate(false);
+        invalidateOptionsMenu();
+    }
+
+    protected void loadPosts() {
+        List<PostObj> cachedPosts = pref.getPosts(getCurrentListType());
+        if (cachedPosts.size() > 0) {
+            Util.debug(this, "Rendering from cached posts for tags ["+getCurrentListType()+"]");
+            updatePostsList(cachedPosts, false, false);
+        }
+        else {
+            Util.debug(this, "Refreshing posts.");
+            (new com.broadcaster.task.TaskManager(BaseDrawerListActivity.this))
+            .addTask(getLoadPostTask())
+            .showProgressAction()
+            .run();
+        }
+    }
+
     @Override
     public void hideProgressAction() {
-        contextualActionBarFinish();
+        contextualActionBarCancel();
+        actionBarProgressText.setText(R.string.action_bar_swipe);
+        postListView.enableOnTouch();
+    }
+    
+    protected void loadMorePosts() {
+        TaskPostLoadBase task = getLoadPostTask();
+        task.setAfterId(getLastId());
+        
+        (new com.broadcaster.task.TaskManager(this))
+        .addTask(task)
+        .showProgressAction()
+        .run();
+    }
+    
+    private void refreshPosts() {
+        (new com.broadcaster.task.TaskManager(this))
+        .addTask(new TaskGetLocation())
+        .addTask((new TaskGetTopics()).setCallback(new com.broadcaster.task.TaskBase.TaskListener() {
+            @Override
+            public void postExecute(com.broadcaster.task.TaskManager tm, ResponseObj response) {
+                refreshTopicsSpinner();
+            }
+        }))
+        .addTask(getLoadPostTask())
+        .showProgressAction()
+        .run();
+    }
+
+    protected TaskPostLoadBase getLoadPostTask() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected TaskPostLoadBase getLoadMorePostTask() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected String getCurrentTopic() {
+        throw new UnsupportedOperationException();
+    }
+    
+    protected POST_LIST_TYPE getCurrentListType() {
+        throw new UnsupportedOperationException();
     }
 }

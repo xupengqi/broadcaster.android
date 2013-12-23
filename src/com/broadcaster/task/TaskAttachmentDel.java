@@ -13,7 +13,6 @@ public class TaskAttachmentDel extends TaskBase {
 
     public TaskAttachmentDel(AttachObj attachment) {
         mAttach = attachment;
-
         setProgressText("Removing attachment...");
     }
 
@@ -23,7 +22,6 @@ public class TaskAttachmentDel extends TaskBase {
         String postId = tm.getResult(TASK_RESULT.POSTID).toString();
         List<NameValuePair> params = BaseActivity.api.getAttachmentParams(BaseActivity.pref.getUser(), mAttach, postId);
         mResponse = BaseActivity.api.delAttachment(params);
-
         return super.doInBackground(args);
     }
 }

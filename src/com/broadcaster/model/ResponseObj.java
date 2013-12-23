@@ -44,6 +44,9 @@ public class ResponseObj {
     }
 
     public String getErrorCode() {
+        if (!hasError()) {
+            return "";
+        }
         return errors.get(0).code;
     }
 

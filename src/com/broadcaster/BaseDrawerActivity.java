@@ -27,7 +27,6 @@ import android.widget.TextView;
 import com.broadcaster.model.DrawerItemHolder;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.DRAWER_ITEMS;
-import com.broadcaster.util.Constants.TASK;
 import com.broadcaster.view.LocationSettings;
 
 public abstract class BaseDrawerActivity extends BaseActivity {
@@ -229,6 +228,7 @@ public abstract class BaseDrawerActivity extends BaseActivity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+    //TODO: REVIEW THIS, FIDN A BETTER WAY
     protected void initProgressElements() {
         loading = (RelativeLayout) findViewById(R.id.loading);
         progressText = (TextView) findViewById(R.id.progressText);
@@ -341,21 +341,16 @@ public abstract class BaseDrawerActivity extends BaseActivity {
     }
 
     @Override
-    public void setProgressText(TASK task) {
-        if (progressText != null) {
-            progressText.setText(getTaskMessage(task));
-        }
-    }
-
-    @Override
     public void setProgressImage(Bitmap image) {
-        // TODO: REMOVE IF
         if (progressImage != null) {
-            progressImage.setVisibility(View.VISIBLE);
-            progressImage.setImageBitmap(image);
-        }
-        else {
-            progressImage.setVisibility(View.GONE);
+            if (image != null) {
+                progressImage.setVisibility(View.VISIBLE);
+                progressImage.setImageBitmap(image);
+            }
+            else {
+                progressImage.setVisibility(View.GONE);
+            }
+            
         }
     }
 }

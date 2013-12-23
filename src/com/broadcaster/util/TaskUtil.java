@@ -20,47 +20,21 @@ public class TaskUtil {
         .begin();
     }
 
-    public static void reply(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.ADD_REPLY)
-        .addTask(TASK.LOAD_POSTS)
-        .begin();
-    }
-
-//    public static void deleteParentPost(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
+//    public static void getViewingLocation(BaseActivity activity, TaskListener listener) {
 //        TaskManager.getExecuter(activity, listener)
-//        .addTask(TASK.DELETE_POST, params)
-//        .addTask(TASK.FINISH)
-//        .begin();
-//    }
-//
-//    public static void deletePost(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
-//        TaskManager.getExecuter(activity, listener)
-//        .addTask(TASK.DELETE_POST, params)
+//        .addTask(TASK.SHOW_PROGRESS)
+//        .addTask(TASK.GET_TAGS)
+//        .addTask(TASK.GET_LOCATION)
 //        .begin();
 //    }
 
-//    public static void undoDelete(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
+//    public static void getRealLocation(BaseActivity activity, TaskListener listener) {
 //        TaskManager.getExecuter(activity, listener)
-//        .addTask(TASK.UNDO_DELETE_POST, params)
+//        .addTask(TASK.SHOW_PROGRESS)
+//        .addTask(TASK.GET_TAGS)
+//        .addTask(TASK.GET_REAL_LOCATION)
 //        .begin();
 //    }
-
-    public static void getViewingLocation(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.SHOW_PROGRESS)
-        .addTask(TASK.GET_TAGS)
-        .addTask(TASK.GET_LOCATION)
-        .begin();
-    }
-
-    public static void getRealLocation(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.SHOW_PROGRESS)
-        .addTask(TASK.GET_TAGS)
-        .addTask(TASK.GET_REAL_LOCATION)
-        .begin();
-    }
 
     public static void getAddress(BaseActivity activity, TaskListener listener, String address) {
         TaskManager.getExecuter(activity, listener)
@@ -68,101 +42,34 @@ public class TaskUtil {
         .begin();
     }
 
-    // TODO :CREAET/UPDATE POST LOCATION
-    /*public static void createPost(BaseActivity activity, TaskListener listener, List<TaskItem> attachments) {
-        TaskManager tm = TaskManager.getExecuter(activity, listener)
-                .addTask(TASK.SHOW_PROGRESS)
-                .addTask(TASK.GET_LOCATION)
-                .addTask(TASK.ADD_POST);
-
-        for(TaskItem ti : attachments) {
-            tm.addTask(ti);
-        }
-        tm.addTask(TASK.FINISH).begin();
-    }*/
-
-    /*public static void updatePost(BaseActivity activity, TaskListener listener, List<TaskItem> attachments) {
-        TaskManager tm = TaskManager.getExecuter(activity, listener)
-                .addTask(TASK.SHOW_PROGRESS)
-                .addTask(TASK.GET_LOCATION)
-                .addTask(TASK.UPDATE_POST);
-
-        for(TaskItem ti : attachments) {
-            tm.addTask(ti);
-        }
-        tm.addTask(TASK.FINISH).begin();
-    }*/
-
-    public static void loadMorePosts(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.GET_LOCATION)
-        .addTask(TASK.LOAD_MORE_POSTS)
-        .begin();
-    }
-
-    public static void refreshPosts(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.GET_TAGS)
-        .addTask(TASK.GET_LOCATION)
-        .addTask(TASK.LOAD_POSTS)
-        .begin();
-    }
-
-    public static void loadPosts(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.LOAD_POSTS)
-        .begin();
-    }
-
-    public static void refreshPostsFromCache(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.LOAD_POSTS_FROM_CACHE)
-        .begin();
-    }
-
-    public static void refreshPostsAndFinish(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.GET_TAGS)
-        .addTask(TASK.GET_LOCATION)
-        .addTask(TASK.LOAD_POSTS)
-        .addTask(TASK.STOP_LOADING_ACTION)
-        .begin();
-    }
-
-    public static void refreshPostsAndStarAndFinish(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.START_LOADING_ACTION)
-        .addTask(TASK.GET_TAGS)
-        .addTask(TASK.GET_LOCATION)
-        .addTask(TASK.LOAD_POSTS)
-        .addTask(TASK.STOP_LOADING_ACTION)
-        .begin();
-    }
+    // TODO: LOCATION AND TAGS DON'T EXPIRE BY GET, BUT UPDATE REGULARY BY BG PROCESS OR MANUAL USER REFRESH (LIST RERRESH BUTOTON)
+//    public static void refreshPostsAndStarAndFinish(BaseActivity activity, TaskListener listener) {
+//        TaskManager.getExecuter(activity, listener)
+//        .addTask(TASK.START_LOADING_ACTION)
+//        .addTask(TASK.GET_TAGS)
+//        .addTask(TASK.GET_LOCATION)
+//        .addTask(TASK.LOAD_POSTS)
+//        .addTask(TASK.STOP_LOADING_ACTION)
+//        .begin();
+//    }
 
     public static void login(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
         TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.SHOW_PROGRESS)
+//        .addTask(TASK.SHOW_PROGRESS)
         .addTask(TASK.LOGIN, params)
         .begin();
     }
 
     public static void register(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
         TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.SHOW_PROGRESS)
+//        .addTask(TASK.SHOW_PROGRESS)
         .addTask(TASK.REGISTER, params)
-        .begin();
-    }
-
-    public static void getAllTags(BaseActivity activity, TaskListener listener) {
-        TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.SHOW_PROGRESS)
-        .addTask(TASK.GET_TAGS)
         .begin();
     }
 
     public static void feedback(BaseActivity activity, TaskListener listener, List<NameValuePair> params) {
         TaskManager.getExecuter(activity, listener)
-        .addTask(TASK.SHOW_PROGRESS)
+//        .addTask(TASK.SHOW_PROGRESS)
         .addTask(TASK.FEEDBACK, params)
         .begin();
     }

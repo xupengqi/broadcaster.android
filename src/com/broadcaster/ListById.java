@@ -1,23 +1,20 @@
 package com.broadcaster;
 
+import org.apache.commons.lang3.StringUtils;
+
 import android.os.Bundle;
 import android.view.Menu;
 
 import com.broadcaster.task.TaskPostLoadBase;
-import com.broadcaster.task.TaskPostLoadByUser;
+import com.broadcaster.task.TaskPostLoadById;
+import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.POST_LIST_TYPE;
 
-public class ListByUser extends BaseDrawerListActivity {
-    private String username;
-    private Integer userId;
+public class ListById extends BaseDrawerListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        username = getIntent().getStringExtra("userName");
-        userId =  getIntent().getIntExtra("userId", 0);
-        setTitle(getTagText(username));
     }
 
     @Override
@@ -32,16 +29,17 @@ public class ListByUser extends BaseDrawerListActivity {
 
     @Override
     protected String getCurrentTopic() {
-        return username;
+        return Constants.SYSTEM_TOPICS.Starred.toString();
     }
 
     @Override
     protected POST_LIST_TYPE getCurrentListType() {
-        return POST_LIST_TYPE.USER;
+        return POST_LIST_TYPE.STAR;
     }
 
+    //TODO: HIDE LOAD MORE BUTTON FROM BEGINNING
     @Override
     protected TaskPostLoadBase getLoadPostTask() {
-        return new TaskPostLoadByUser(userId);
+        return new TaskPostLoadById(StringUtils.join(pref.getStarred(), ","));
     }
 }

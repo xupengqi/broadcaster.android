@@ -238,7 +238,8 @@ public class Settings extends BaseDrawerActivity {
     }
 
     public class SettingsListener extends TaskListener {
-        @Override
+        /*@Override
+        //TODO: FIX THIS
         public void onPreExecute(TaskItem ti, TaskManager mgr) {
             super.onPreExecute(ti, mgr);
 
@@ -258,7 +259,7 @@ public class Settings extends BaseDrawerActivity {
             default:
                 break;
             }
-        }
+        }*/
 
         @Override
         public void onExecute(TaskItem ti, TaskManager mgr) {

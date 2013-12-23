@@ -7,6 +7,7 @@ import java.util.Queue;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.model.ResponseObj;
+import com.broadcaster.task.TaskBase.TaskListener;
 import com.broadcaster.util.Constants.TASK_RESULT;
 
 public class TaskManager {
@@ -14,8 +15,8 @@ public class TaskManager {
     private Queue<TaskBase> mTasks;
     private boolean mShowProgressOverlay;
     private boolean mShowProgressAction;
-    private boolean mExitActivity;
     private Map<TASK_RESULT, Object> mResults;
+    private TaskListener mListener;
     
     public TaskManager(BaseActivity a) {
         mActivity = a;
@@ -23,7 +24,6 @@ public class TaskManager {
         mResults = new HashMap<TASK_RESULT, Object>();
         mShowProgressOverlay = false;
         mShowProgressAction = false;
-        mExitActivity = false;
     }
     
     public TaskManager addTask(TaskBase task) {
@@ -46,8 +46,8 @@ public class TaskManager {
         return this;
     }
     
-    public TaskManager exitActivity() {
-        mExitActivity = true;
+    public TaskManager setCallback(TaskListener listener) {
+        mListener = listener;
         return this;
     }
     
@@ -78,7 +78,6 @@ public class TaskManager {
         if(response!= null && response.hasError()) {
             mActivity.showError(mActivity.toString(), response.getError());
             mTasks.clear();
-            mExitActivity = false;
         }
         
         if (mTasks.size() > 0) {
@@ -99,8 +98,8 @@ public class TaskManager {
         if (mShowProgressAction) {
             mActivity.hideProgressAction();
         }
-        if (mExitActivity) {
-            mActivity.exitActivity(mResults);
+        if (mListener != null) {
+            mListener.postExecute(this, null);
         }
     }
 }

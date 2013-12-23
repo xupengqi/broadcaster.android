@@ -1,7 +1,6 @@
 package com.broadcaster.util;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -14,6 +13,7 @@ import com.broadcaster.BaseActivity;
 import com.broadcaster.model.LocationObj;
 import com.broadcaster.model.PostObj;
 import com.broadcaster.model.UserObj;
+import com.broadcaster.util.Constants.POST_LIST_TYPE;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -23,7 +23,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class PrefUtil {
     private BaseActivity context;
-    
+
     private SharedPreferences sharedPref;
     private Gson gson;
     private JsonParser parser;
@@ -55,7 +55,7 @@ public class PrefUtil {
         gson = new Gson();
         parser = new JsonParser();
     }
-    
+
     public boolean justInstalled() {
         boolean firstTimer = sharedPref.getBoolean(KEY_FIRST, true);
         if (firstTimer) {
@@ -66,20 +66,16 @@ public class PrefUtil {
         return firstTimer;
     }
 
-    private String getPostKey(String tag, String location) {
-        return KEY_POSTS_PREFIX+tag+"@"+location;
-    }
-
-
-    public void setPosts(String tag, String location, List<PostObj> posts) {
+    public void setPosts(POST_LIST_TYPE type, List<PostObj> posts) {
         Editor editor = sharedPref.edit();
-        editor.putString(getPostKey(tag, location), gson.toJson(posts));
+        editor.putString(KEY_POSTS_PREFIX+type, gson.toJson(posts));
         editor.commit();
     }
-    public List<PostObj> getPosts(String tag, String location) {
+
+    public List<PostObj> getPosts(POST_LIST_TYPE type) {
         List<PostObj> posts = new ArrayList<PostObj>();
         try {
-            JsonArray arr = parser.parse(sharedPref.getString(getPostKey(tag, location), "[]")).getAsJsonArray();
+            JsonArray arr = parser.parse(sharedPref.getString(KEY_POSTS_PREFIX+type, "[]")).getAsJsonArray();
             for (JsonElement jsonElement : arr) {
                 posts.add(gson.fromJson(jsonElement, PostObj.class));
             }
@@ -88,6 +84,12 @@ public class PrefUtil {
             Util.logError(context, e);
         }
         return posts;
+    }
+
+    public void clearPosts(POST_LIST_TYPE type) {
+        Editor editor = sharedPref.edit();
+        editor.remove(KEY_POSTS_PREFIX+type);
+        editor.commit();
     }
 
     public void addRemoveStarred(Integer id) {
@@ -195,14 +197,12 @@ public class PrefUtil {
     }
 
     public void setUseEverything(boolean everything) {
-        Util.debug("Use everything: "+everything);
         Editor editor = sharedPref.edit();
         editor.putBoolean(KEY_USE_EVERYTHING, everything);
         editor.commit();
     }
 
     public void setAllTags(String allTags) {
-        Util.debug("GOT ALL TAGS");
         Editor editor = sharedPref.edit();
         editor.putString(KEY_ALLTAGS, allTags);
         editor.commit();
@@ -212,11 +212,11 @@ public class PrefUtil {
         return sharedPref.getString(KEY_ALLTAGS, null);
     }
 
-    public void clearAllTags() {
-        Editor editor = sharedPref.edit();
-        editor.remove(KEY_ALLTAGS);
-        editor.commit();
-    }
+//    public void clearAllTags() {
+//        Editor editor = sharedPref.edit();
+//        editor.remove(KEY_ALLTAGS);
+//        editor.commit();
+//    }
 
     public void setRealLocation(LocationObj l) {
         Editor editor = sharedPref.edit();
@@ -233,16 +233,16 @@ public class PrefUtil {
         JsonObject locJson = parser.parse(locStr).getAsJsonObject();
         LocationObj loc = gson.fromJson(locJson, LocationObj.class);
 
-        Long timeNow = (new Date()).getTime();
-        if (loc.exp <= timeNow) {
-            Util.debug("location expired "+((timeNow-loc.exp)/1000)+" seconds ago: "+loc.name);
-            return null;
-        }
+        //        Long timeNow = (new Date()).getTime();
+        //        if (loc.exp <= timeNow) {
+        //            Util.debug("location expired "+((timeNow-loc.exp)/1000)+" seconds ago: "+loc.name);
+        //            return null;
+        //        }
 
-        Util.debug("location will expire in "+((loc.exp-timeNow)/1000)+" seconds: "+loc.name);
+        //        Util.debug("location will expire in "+((loc.exp-timeNow)/1000)+" seconds: "+loc.name);
         return loc;
     }
-    
+
     public void clearRealLocation() {
         Editor editor = sharedPref.edit();
         editor.remove(KEY_REAL_LOCATION);
@@ -274,7 +274,7 @@ public class PrefUtil {
         locations.remove(position);
         setLocations(locations);
     }
-    
+
     public Integer getViewingLocationPosition() {
         return sharedPref.getInt(KEY_LOCATION_VIEWING, -1);
     }
@@ -300,29 +300,29 @@ public class PrefUtil {
         editor.putFloat(KEY_RADIUS, seekBarToRadius);
         editor.commit();
     }
-    
+
     public void setErrorAllowed(boolean allowed) {
         Editor editor = sharedPref.edit();
         editor.putBoolean(KEY_SEND_ERROR, allowed);
         editor.commit();
     }
-    
+
     public boolean sendErrorAllowed() {
         return sharedPref.getBoolean(KEY_SEND_ERROR, true);
     }
-    
+
     public void addError(Exception e) {
         List<String> errors = getError();
         errors.add(ExceptionUtils.getStackTrace(e));
         if (errors.size() > 5) {
             errors.remove(0);
         }
-        
+
         Editor editor = sharedPref.edit();
         editor.putString(KEY_ERROR, gson.toJson(errors));
         editor.commit();
     }
-    
+
     public List<String> getError() {
         String errors = sharedPref.getString(KEY_ERROR, "[]");
         return gson.fromJson(errors, new TypeToken<List<String>>(){}.getType());

@@ -23,11 +23,19 @@ public class Constants {
 //        FINISH,
 //        DEL_ATTACHMENT,
 //        UNDO_DELETE_POST,
-        ADD_REPLY,
-        LOAD_POSTS,
-        LOAD_POSTS_FROM_CACHE,
-        LOAD_MORE_POSTS,
-        LOAD_OWN_POSTS,
+//        ADD_REPLY,
+//        LOAD_POSTS,
+//        LOAD_POSTS_FROM_CACHE,
+//        LOAD_MORE_POSTS,
+//        LOAD_OWN_POSTS,
+//        START_LOADING_ACTION,
+//        STOP_LOADING_ACTION,
+//        SHOW_PROGRESS,
+//        GET_LOCATION,
+//        GET_REAL_LOCATION,
+//        GET_TAGS,
+//        BEFORE_GETTING_LOCATION,
+//        NO_LOCATION,
         LOGIN,
         LOGIN_FB,
         LOGIN_GPLUS,
@@ -35,15 +43,7 @@ public class Constants {
         REMOVE_FB,
         REGISTER,
         DOWNLOAD,
-        START_LOADING_ACTION,
-        STOP_LOADING_ACTION,
-        GET_LOCATION,
-        GET_REAL_LOCATION,
-        BEFORE_GETTING_LOCATION,
         GET_ADDRESS,
-        GET_TAGS,
-        NO_LOCATION,
-        SHOW_PROGRESS,
         SPLASH_FINISH,
         SPLASH_SETUP,
         SPLASH_PREPARE,
@@ -60,6 +60,14 @@ public class Constants {
         POSTID,
         ANY
     };
+    
+    public static enum POST_LIST_TYPE {
+        PREF,
+        TOPIC,
+        USER,
+        STAR,
+        PARENT
+    }
 
     public static final int REQUEST_MEDIA = 1;
     public static final int REQUEST_PICK_IMAGE = 2;
@@ -80,7 +88,7 @@ public class Constants {
 
     public static final String RESERVED_TAG_OWN = "[[RESERVED_TAG_OWN]]";
     public static final String RESERVED_TAG_EVERYTHING = "[[RESERVED_TAG_EVERYTHING]]";
-    public static final String RESERVED_TAG_STARRED = "[[RESERVED_TAG_STARRED]]";
+//    public static final String RESERVED_TAG_STARRED = "[[RESERVED_TAG_STARRED]]";
 
     public static enum API_ERRORS {Unknown, RESOURCE_NOT_FOUND, REQUIRE_LOGIN};
 
