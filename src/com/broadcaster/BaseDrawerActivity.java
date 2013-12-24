@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.broadcaster.model.DrawerItemHolder;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.DRAWER_ITEMS;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.view.LocationSettings;
 
 public abstract class BaseDrawerActivity extends BaseActivity {
@@ -241,7 +242,7 @@ public abstract class BaseDrawerActivity extends BaseActivity {
 
         progressCancel.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                hideProgressOverlay();
+                hideProgress(PROGRESS_TYPE.OVERLAY);
             }
         });
     }
@@ -318,18 +319,30 @@ public abstract class BaseDrawerActivity extends BaseActivity {
     }
 
     @Override
-    public void showProgressOverlay() {
-        if (loading != null) {
-            loading.setVisibility(View.VISIBLE);
-            //getActionBar().hide();
+    public void showProgress(PROGRESS_TYPE type) {
+        switch(type) {
+        case OVERLAY:
+            if (loading != null) {
+                loading.setVisibility(View.VISIBLE);
+            }
+            break;
+        default:
+            super.showProgress(type);
+            break;
         }
     }
 
     @Override
-    public void hideProgressOverlay() {
-        if (loading != null) {
-            loading.setVisibility(View.GONE);
-            //getActionBar().show();
+    public void hideProgress(PROGRESS_TYPE type) {
+        switch(type) {
+        case OVERLAY:
+            if (loading != null) {
+                loading.setVisibility(View.GONE);
+            }
+            break;
+        default:
+            super.hideProgress(type);
+            break;
         }
     }
 
@@ -350,7 +363,7 @@ public abstract class BaseDrawerActivity extends BaseActivity {
             else {
                 progressImage.setVisibility(View.GONE);
             }
-            
+
         }
     }
 }

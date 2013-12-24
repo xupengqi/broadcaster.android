@@ -16,6 +16,7 @@ import com.broadcaster.model.PostObj;
 import com.broadcaster.task.TaskBase;
 import com.broadcaster.task.TaskPostUpdate;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.Util;
 
 public class PostEdit extends PostNew {
@@ -77,7 +78,7 @@ public class PostEdit extends PostNew {
         com.broadcaster.task.TaskManager tm = new com.broadcaster.task.TaskManager(PostEdit.this);
         tm.addTask(new TaskPostUpdate(constructNewPost()))
         .addTask(attachmentTasks)
-        .showProgressOverlay()
+        .setProgress(PROGRESS_TYPE.OVERLAY)
         .setCallback(getSubmitCallback())
         .run();
     }

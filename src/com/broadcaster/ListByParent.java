@@ -23,6 +23,7 @@ import com.broadcaster.task.TaskPostLoadByParent;
 import com.broadcaster.task.TaskPostReply;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.POST_LIST_TYPE;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.google.gson.Gson;
 
 public class ListByParent extends BaseDrawerListActivity {
@@ -55,7 +56,7 @@ public class ListByParent extends BaseDrawerListActivity {
 
         initProgressElements();
         postId = getIntent().getIntExtra("postId", 0);
-//        tag = "post"+postId;
+        //        tag = "post"+postId;
     }
 
     @Override
@@ -134,21 +135,31 @@ public class ListByParent extends BaseDrawerListActivity {
 
     @Override
     // TODO: SEACH FOR ALL 4 SHOW/HIDE PROGRESS METHODS AND REVIEW CODE
-    public void showProgressOverlay() {
-        if (replyBox != null) {
+    public void showProgress(PROGRESS_TYPE type) {
+        switch(type) {
+        case INLINE:
             hideKeyboard();
-            replyBox.setVisibility(View.GONE);
-            footerProgress.setVisibility(View.VISIBLE);
-            footerButton.setVisibility(View.GONE);
+            if (replyBox != null) {
+                replyBox.setVisibility(View.GONE);
+            }
+            break;
+        default:
+            super.showProgress(type);
+            break;
         }
     }
 
     @Override
-    public void hideProgressOverlay() {
-        if (replyBox != null) {
-            replyBox.setVisibility(View.VISIBLE);
-            footerProgress.setVisibility(View.GONE);
-            footerButton.setVisibility(View.VISIBLE);
+    public void hideProgress(PROGRESS_TYPE type) {
+        switch(type) {
+        case INLINE:
+            if (replyBox != null) {
+                replyBox.setVisibility(View.VISIBLE);
+            }
+            break;
+        default:
+            super.hideProgress(type);
+            break;
         }
     }
 
@@ -244,7 +255,7 @@ public class ListByParent extends BaseDrawerListActivity {
             }
         }))
         .addTask((new TaskPostLoadByParent(postId)).setAfterId(getLastId()))
-        .showProgressAction()
+        .setProgress(PROGRESS_TYPE.INLINE)
         .run();
     }
 }

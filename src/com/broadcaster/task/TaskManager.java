@@ -8,13 +8,13 @@ import java.util.Queue;
 import com.broadcaster.BaseActivity;
 import com.broadcaster.model.ResponseObj;
 import com.broadcaster.task.TaskBase.TaskListener;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.Constants.TASK_RESULT;
 
 public class TaskManager {
     private BaseActivity mActivity;
     private Queue<TaskBase> mTasks;
-    private boolean mShowProgressOverlay;
-    private boolean mShowProgressAction;
+    private PROGRESS_TYPE mProgressType;
     private Map<TASK_RESULT, Object> mResults;
     private TaskListener mListener;
     
@@ -22,8 +22,6 @@ public class TaskManager {
         mActivity = a;
         mTasks = new LinkedList<TaskBase>();
         mResults = new HashMap<TASK_RESULT, Object>();
-        mShowProgressOverlay = false;
-        mShowProgressAction = false;
     }
     
     public TaskManager addTask(TaskBase task) {
@@ -36,13 +34,8 @@ public class TaskManager {
         return this;
     }
     
-    public TaskManager showProgressOverlay() {
-        mShowProgressOverlay = true;
-        return this;
-    }
-    
-    public TaskManager showProgressAction() {
-        mShowProgressAction = true;
+    public TaskManager setProgress(PROGRESS_TYPE type) {
+        mProgressType = type;
         return this;
     }
     
@@ -64,11 +57,8 @@ public class TaskManager {
     }
     
     public void run() {
-        if (mShowProgressOverlay) {
-            mActivity.showProgressOverlay();
-        }
-        if (mShowProgressAction) {
-            mActivity.showProgressAction();
+        if (mProgressType != null) {
+            mActivity.showProgress(mProgressType);
         }
         
         runNext(null);
@@ -92,11 +82,8 @@ public class TaskManager {
     }
     
     private void finish() {
-        if (mShowProgressOverlay) {
-            mActivity.hideProgressOverlay();
-        }
-        if (mShowProgressAction) {
-            mActivity.hideProgressAction();
+        if (mProgressType != null) {
+            mActivity.hideProgress(mProgressType);
         }
         if (mListener != null) {
             mListener.postExecute(this, null);

@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import com.broadcaster.BaseActivity;
 import com.broadcaster.model.ResponseObj;
 import com.broadcaster.model.TaskItem;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.Constants.TASK;
 import com.broadcaster.util.Constants.TASK_RESULT;
 
@@ -82,7 +83,7 @@ public class TaskManager {
 
     public void begin() {
         if(tasks.isEmpty()) {
-            activity.hideProgressOverlay();
+            activity.hideProgress(PROGRESS_TYPE.OVERLAY);
         }
         else {
             final TaskItem ti = tasks.poll();

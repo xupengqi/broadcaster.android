@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.broadcaster.util.AccountTaskListener;
 import com.broadcaster.util.Constants;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.Constants.TASK;
 import com.broadcaster.util.PrefUtil;
 import com.broadcaster.util.RestAPI;
@@ -376,19 +377,11 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
         mConnectionResult = result;
     }
 
-    public void showProgressOverlay() {
+    public void showProgress(PROGRESS_TYPE type) {
         throw new UnsupportedOperationException();
     }
 
-    public void hideProgressOverlay() {
-        throw new UnsupportedOperationException();
-    }
-    
-    public void showProgressAction() {
-        throw new UnsupportedOperationException();
-    }
-    
-    public void hideProgressAction() {
+    public void hideProgress(PROGRESS_TYPE type) {
         throw new UnsupportedOperationException();
     }
 

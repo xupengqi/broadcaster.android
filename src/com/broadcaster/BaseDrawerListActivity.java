@@ -38,6 +38,7 @@ import com.broadcaster.task.TaskPostLoadBase;
 import com.broadcaster.task.TaskPostUnDel;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.POST_LIST_TYPE;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.TaskListener;
 import com.broadcaster.util.TaskManager;
 import com.broadcaster.util.Util;
@@ -69,6 +70,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
 
     private ProgressBar actionBarProgressBar;
     private TextView actionBarProgressText;
+    private boolean mActionBarProgressIndeterminate = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,18 +139,27 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
 
             @Override
             public void onOverScrollStart() {
-                showProgressAction();
+                mActionBarProgressIndeterminate = false;
+                showProgress(PROGRESS_TYPE.ACTION);
+                mActionBarProgressIndeterminate = true;
             }
 
             @Override
             public void onOverScrollCancel() {
-                contextualActionBarCancel();
+                hideProgress(PROGRESS_TYPE.ACTION);
             }
 
             @Override
             public void onOverScrollConfirm(double p) {
                 int width = (int) (Util.getWindowWidth(BaseDrawerListActivity.this)*p);
                 actionBarProgressBar.setLayoutParams(new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT));
+            }
+        });
+
+        footerButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                loadMorePosts();
             }
         });
 
@@ -220,6 +231,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         if (!(this instanceof ListByParent) && !(this instanceof ListByUser)) {
             MenuItem topicsMenuItem = menu.findItem(R.id.menu_go_to_topic);
             topicsSpinner = (Spinner)topicsMenuItem.getActionView().findViewById(R.id.simple_spinner);
+            constructTopicsSpinner();
             topicsSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, topicSpinnerItems);
             topicsSpinner.setAdapter(topicsSpinnerAdapter);
             topicsSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -262,8 +274,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
                 @Override
                 public void onNothingSelected(AdapterView<?> arg0) { }
             });
-
-            refreshTopicsSpinner();
         }
         return true;
     }
@@ -325,7 +335,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         switch (item.getItemId()) {
         case R.id.menu_refresh:
             refreshPosts();
-//            TaskUtil.refreshPostsAndStarAndFinish(BaseDrawerListActivity.this, listener);
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -336,8 +345,8 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     protected int getContentView() {
         return R.layout.activity_list;
     }
-
-    protected void refreshTopicsSpinner() {
+    
+    protected void constructTopicsSpinner() {
         topicSpinnerItems.clear();
         topicSpinnerItems.add(Constants.SYSTEM_TOPICS.Homepage.toString());
         topicSpinnerItems.add(Constants.SYSTEM_TOPICS.Starred.toString());
@@ -349,7 +358,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         for (String topic : topics) {
             topicSpinnerItems.add(topic);
         }    
-        invalidateOptionsMenu();
     }
 
     private void selectCurrentTopic() {
@@ -365,23 +373,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         }
     }
 
-    public void noMoreToLoad() {
-        footerProgress.setVisibility(View.GONE);
-        footerButton.setVisibility(View.VISIBLE);
-        footerButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                loadingMore();
-                loadMorePosts();
-            }
-        });
-    }
-
-    public void loadingMore() {
-        footerProgress.setVisibility(View.VISIBLE);
-        footerButton.setVisibility(View.GONE);
-    }
-
     protected PostViewHolder getHolderInstance() {
         return new PostViewHolder(this);
     }
@@ -393,13 +384,11 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         currentPosts.addAll(loadedPosts);
         if(currentPosts.size() < Constants.POST_PAGE_SIZE) {
             haveMoreToLoad = false;
-            noMoreToLoad();
+            hideProgress(PROGRESS_TYPE.INLINE);
         }
         else {
             haveMoreToLoad = true;
-            if (!append) {
-                loadingMore();
-            }
+            showProgress(PROGRESS_TYPE.INLINE);
         }
         updatePostsList(saveToCache);
     }
@@ -426,7 +415,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         post.deleted = false;
         (new com.broadcaster.task.TaskManager(this))
         .addTask(new TaskPostUnDel(post))
-        .showProgressAction()
+        .setProgress(PROGRESS_TYPE.ACTION)
         .run();
         updatePostsList();
     }
@@ -475,35 +464,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         }
     }
 
-    @Override
-    public void showProgressAction() {
-        getActionBar().setCustomView(R.layout.module_cab);
-        getActionBar().setDisplayShowHomeEnabled(false);
-        getActionBar().setDisplayShowCustomEnabled(true);
-        //getActionBar().setDisplayShowTitleEnabled(false);
-        reloadStart = true;
-        invalidateOptionsMenu(); // this will call onPrepareOptionsMenu()
-        actionBarProgressText = (TextView) getActionBar().getCustomView().findViewById(R.id.action_bar_text);
-        actionBarProgressBar = (ProgressBar) getActionBar().getCustomView().findViewById(R.id.action_bar_progress);
-        actionBarProgressBar.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        actionBarProgressBar.setIndeterminate(true);
-    }
-
-    private void contextualActionBarCancel() {
-        //getActionBar().setDisplayShowTitleEnabled(true);
-        //if (!showLocations) {
-        //    getActionBar().setDisplayShowCustomEnabled(false);
-        //}
-        //if (showLocations) {
-        //    renderActionBarLocations();
-        //}
-        reloadStart = false;
-        getActionBar().setDisplayShowCustomEnabled(false);
-        getActionBar().setDisplayShowHomeEnabled(true);
-        actionBarProgressBar.setIndeterminate(false);
-        invalidateOptionsMenu();
-    }
-
     protected void loadPosts() {
         List<PostObj> cachedPosts = pref.getPosts(getCurrentListType());
         if (cachedPosts.size() > 0) {
@@ -514,39 +474,91 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             Util.debug(this, "Refreshing posts.");
             (new com.broadcaster.task.TaskManager(BaseDrawerListActivity.this))
             .addTask(getLoadPostTask())
-            .showProgressAction()
+            .setProgress(PROGRESS_TYPE.INLINE)
             .run();
         }
     }
 
     @Override
-    public void hideProgressAction() {
-        contextualActionBarCancel();
-        actionBarProgressText.setText(R.string.action_bar_swipe);
-        postListView.enableOnTouch();
+    public void showProgress(PROGRESS_TYPE type) {
+        switch(type) {
+        case ACTION:
+            getActionBar().setCustomView(R.layout.module_cab);
+            getActionBar().setDisplayShowHomeEnabled(false);
+            getActionBar().setDisplayShowCustomEnabled(true);
+            //getActionBar().setDisplayShowTitleEnabled(false);
+            reloadStart = true;
+            invalidateOptionsMenu(); // this will call onPrepareOptionsMenu()
+            actionBarProgressText = (TextView) getActionBar().getCustomView().findViewById(R.id.action_bar_text);
+            actionBarProgressBar = (ProgressBar) getActionBar().getCustomView().findViewById(R.id.action_bar_progress);
+            actionBarProgressBar.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+            actionBarProgressBar.setIndeterminate(mActionBarProgressIndeterminate);
+            break;
+        case INLINE:
+            if (footerProgress != null) {
+                footerProgress.setVisibility(View.VISIBLE);
+                footerButton.setVisibility(View.GONE);
+            }
+            break;
+        default:
+            super.showProgress(type);
+            break;
+        }
     }
-    
+
+    @Override
+    public void hideProgress(PROGRESS_TYPE type) {
+        switch(type) { //TODO: SET BREAKPOINT HERE, THIS IS CALLED TOO MANY TIMES
+        case ACTION:
+            //getActionBar().setDisplayShowTitleEnabled(true);
+            //if (!showLocations) {
+            //    getActionBar().setDisplayShowCustomEnabled(false);
+            //}
+            //if (showLocations) {
+            //    renderActionBarLocations();
+            //}
+            reloadStart = false;
+            getActionBar().setDisplayShowHomeEnabled(true);
+            getActionBar().setDisplayShowCustomEnabled(false);
+            actionBarProgressBar.setIndeterminate(false);
+            invalidateOptionsMenu();
+            actionBarProgressText.setText(R.string.action_bar_swipe);
+            postListView.enableOnTouch();
+            break;
+        case INLINE:
+            if (footerProgress != null) {
+                footerProgress.setVisibility(View.GONE);
+                footerButton.setVisibility(View.VISIBLE);
+            }
+            break;
+        default:
+            super.hideProgress(type);
+            break;
+        }
+    }
+
     protected void loadMorePosts() {
         TaskPostLoadBase task = getLoadPostTask();
         task.setAfterId(getLastId());
-        
+
         (new com.broadcaster.task.TaskManager(this))
         .addTask(task)
-        .showProgressAction()
+        .setProgress(PROGRESS_TYPE.INLINE)
         .run();
     }
-    
+
     private void refreshPosts() {
         (new com.broadcaster.task.TaskManager(this))
         .addTask(new TaskGetLocation())
         .addTask((new TaskGetTopics()).setCallback(new com.broadcaster.task.TaskBase.TaskListener() {
             @Override
             public void postExecute(com.broadcaster.task.TaskManager tm, ResponseObj response) {
-                refreshTopicsSpinner();
+                constructTopicsSpinner();
+                invalidateOptionsMenu();
             }
         }))
         .addTask(getLoadPostTask())
-        .showProgressAction()
+        .setProgress(PROGRESS_TYPE.ACTION)
         .run();
     }
 
@@ -561,7 +573,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     protected String getCurrentTopic() {
         throw new UnsupportedOperationException();
     }
-    
+
     protected POST_LIST_TYPE getCurrentListType() {
         throw new UnsupportedOperationException();
     }

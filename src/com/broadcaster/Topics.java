@@ -16,6 +16,7 @@ import com.broadcaster.model.ResponseObj;
 import com.broadcaster.task.TaskBase.TaskListener;
 import com.broadcaster.task.TaskGetTopics;
 import com.broadcaster.task.TaskManager;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.TagsListAdapter;
 
 public class Topics extends BaseDrawerActivity {
@@ -61,7 +62,7 @@ public class Topics extends BaseDrawerActivity {
                 renderTags();
             }
         }))
-        .showProgressAction()
+        .setProgress(PROGRESS_TYPE.ACTION)
         .run();
     }
 

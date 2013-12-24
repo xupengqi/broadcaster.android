@@ -14,6 +14,8 @@ public class Constants {
     public static enum HTTP_METHOD {GET, POST, PUT, DELETE};
 
     public static enum MEDIA_TYPE {IMAGE, AUDIO, VIDEO, DELETE};
+    
+    public static enum PROGRESS_TYPE {OVERLAY, ACTION, INLINE};
 
     public static enum TASK {
 //        ADD_POST,

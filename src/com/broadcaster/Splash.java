@@ -45,10 +45,6 @@ public class Splash extends BaseActivity {
     }
 
     @Override
-    public void hideProgressOverlay() {
-    }
-
-    @Override
     protected int getContentView() {
         return R.layout.activity_splash;
     }

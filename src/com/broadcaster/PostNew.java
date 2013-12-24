@@ -47,6 +47,7 @@ import com.broadcaster.task.TaskManager;
 import com.broadcaster.task.TaskPostNew;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.Constants.TASK_RESULT;
 import com.broadcaster.util.ImageUtil;
 import com.broadcaster.util.PathUtil;
@@ -155,7 +156,7 @@ public class PostNew extends BaseDrawerActivity {
                 refreshTopics("default"); // TODO: WILL THIS REFRESH THE LIST AGAIN? IMPLEMENT REFERSH BUTTON FOR TAG AND LOCATION?
             }
         }))
-        .showProgressAction()
+        .setProgress(PROGRESS_TYPE.OVERLAY)
         .run();
     }
 
@@ -240,7 +241,7 @@ public class PostNew extends BaseDrawerActivity {
         .addTask(new TaskPostNew(constructNewPost()))
         .addTask(attachmentTasks)
         .setCallback(getSubmitCallback())
-        .showProgressOverlay()
+        .setProgress(PROGRESS_TYPE.OVERLAY)
         .run();
     }
 
@@ -359,15 +360,27 @@ public class PostNew extends BaseDrawerActivity {
     }
 
     @Override
-    public void showProgressOverlay() {
-        super.showProgressOverlay();
-        getActionBar().hide();
+    public void showProgress(PROGRESS_TYPE type) {
+        switch(type) {
+        case OVERLAY:
+            getActionBar().hide();
+            break;
+        default:
+            super.showProgress(type);
+            break;
+        }
     }
 
     @Override
-    public void hideProgressOverlay() {
-        super.hideProgressOverlay();
-        getActionBar().show();
+    public void hideProgress(PROGRESS_TYPE type) {
+        switch(type) {
+        case OVERLAY:
+            getActionBar().show();
+            break;
+        default:
+            super.hideProgress(type);
+            break;
+        }
     }
 
     private void insertAudio(final Uri audioFile) {

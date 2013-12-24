@@ -33,6 +33,7 @@ import com.broadcaster.model.LocationObj;
 import com.broadcaster.model.ResponseObj;
 import com.broadcaster.model.TaskItem;
 import com.broadcaster.task.TaskGetLocation;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.LocationUtil;
 import com.broadcaster.util.TaskListener;
 import com.broadcaster.util.TaskManager;
@@ -190,7 +191,7 @@ public class LocationSettings extends LinearLayout {
                 currentLocationSelect.setText(loc.name);
             }
         }))
-        .showProgressAction()
+        .setProgress(PROGRESS_TYPE.INLINE)
         .run();
     }
 
@@ -224,12 +225,6 @@ public class LocationSettings extends LinearLayout {
             //TODO: SHOW ACTION BAR PROGRESS
             TaskUtil.getAddress(activity, new LocationSettingsListener(), address);
         }
-    }
-
-    public void onGetRealLocation() {
-        LocationObj loc = BaseActivity.pref.getRealLocation();
-        currentLocationSelect.setText(loc.name);
-        //TODO: HIDE ACTIONBAR PROGRESS
     }
 
     public void addLocation(String addressLine, double latitude, double longitude) {
