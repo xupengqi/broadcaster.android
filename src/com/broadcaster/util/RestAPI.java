@@ -30,6 +30,7 @@ import com.broadcaster.model.LocationObj;
 import com.broadcaster.model.PostObj;
 import com.broadcaster.model.ResponseObj;
 import com.broadcaster.model.UserObj;
+import com.broadcaster.util.Constants.ERROR_TYPE;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
 import com.google.gson.Gson;
 
@@ -335,6 +336,12 @@ public class RestAPI {
 
     private ResponseObj sendRequest(Constants.HTTP_METHOD method, String model, String action, List<NameValuePair> params) {
         ResponseObj response = null;
+        
+        if (!Util.isNetworkAvailable(context)) {
+            response = new ResponseObj(ERROR_TYPE.NO_CONN);
+            return response;
+        }
+        
         AndroidHttpClient hc = AndroidHttpClient.newInstance(Constants.APP_NAME);
         HttpRequestBase hq;
         try {
@@ -378,6 +385,13 @@ public class RestAPI {
     }
 
     private ResponseObj sendFileRequest(String model, String action, List<NameValuePair> params, File file, Constants.MEDIA_TYPE type) {
+        ResponseObj response = null;
+        
+        if (!Util.isNetworkAvailable(context)) {
+            response = new ResponseObj(ERROR_TYPE.NO_CONN);
+            return response;
+        }
+        
         FileEntity fileentity; 
         switch(type) {
         case IMAGE:
@@ -388,8 +402,6 @@ public class RestAPI {
             break;
         }
         fileentity.setChunked(true); 
-
-        ResponseObj response = null;
         AndroidHttpClient hc = AndroidHttpClient.newInstance(Constants.APP_NAME);
         try {
             Builder uriBuilder = new Uri.Builder().scheme("http").authority(Constants.authority).path(Constants.appRoot+model+"/"+action);
@@ -416,6 +428,9 @@ public class RestAPI {
     }
 
     public GeocodeResponse sendGeocodeRequest(List<NameValuePair> params) {
+        if (!Util.isNetworkAvailable(context)) {
+            return null;
+        }
         GeocodeResponse response = null;
         AndroidHttpClient hc = AndroidHttpClient.newInstance(Constants.APP_NAME);
         HttpRequestBase hq;

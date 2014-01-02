@@ -35,9 +35,14 @@ public class TaskGetLocation extends TaskBase {
                     }
                 } catch (IOException e) {
                     Util.logError(tm.getActivity(), e);
-                    GeocodeResponse gr = BaseActivity.api.sendGeocodeRequest(BaseActivity.api.getGeocodeRequestParams(loc));
-                    loc.name = gr.getLocality();
-                    BaseActivity.pref.setRealLocation(loc);
+                    if (Util.isNetworkAvailable(tm.getActivity())) {
+                        GeocodeResponse gr = BaseActivity.api.sendGeocodeRequest(BaseActivity.api.getGeocodeRequestParams(loc));
+                        loc.name = gr.getLocality();
+                        BaseActivity.pref.setRealLocation(loc);
+                    }
+                    else {
+                        //TODO: HANDLE NO LOCATION NAME
+                    }
                 }
                 TaskGetLocation.super.onPostExecute(tm);
             }

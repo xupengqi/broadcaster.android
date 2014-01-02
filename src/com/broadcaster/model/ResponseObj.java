@@ -4,12 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.broadcaster.util.Constants;
+import com.broadcaster.util.Constants.ERROR_TYPE;
 import com.broadcaster.util.Constants.TASK;
 import com.google.gson.JsonObject;
 
 public class ResponseObj {
     public List<ResponseError> errors = new ArrayList<ResponseError>();;
-    public JsonObject data;
+    public JsonObject data = new JsonObject();
+    
+    public ResponseObj() {}
+    
+    public ResponseObj(ERROR_TYPE error) {
+        errors.add(ResponseError.createError(error));
+    }
 
     public boolean hasError() {
         return (errors.size() > 0);
@@ -50,15 +57,29 @@ public class ResponseObj {
         return errors.get(0).code;
     }
 
-    public class ResponseError {
+    public static class ResponseError {
         public Integer id;
         public String code;
         public String msg;
         public String custom_msg;
+        
+        public ResponseError() { }
+        
+        //TODO: REFACTOR RESPONSE ERROR, {NAME,MESSAGE}
+        public ResponseError(Integer id, String code, String msg, String custom_msg) {
+            this.id = id;
+            this.code = code;
+            this.msg = msg;
+            this.custom_msg = custom_msg;
+        }
 
         @Override
         public String toString() {
             return msg+" "+custom_msg;
+        }
+        
+        public static ResponseError createError(ERROR_TYPE type) {
+            return new ResponseError(0, "NO_INTERNET", "NO INTERNET CONNECTION", "");
         }
     }
 }

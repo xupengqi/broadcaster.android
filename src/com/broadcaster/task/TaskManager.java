@@ -77,16 +77,16 @@ public class TaskManager {
             task.execute(this);
         }
         else {
-            finish();
+            finish(response);
         }
     }
     
-    private void finish() {
+    private void finish(ResponseObj response) {
         if (mProgressType != null) {
             mActivity.hideProgress(mProgressType);
         }
         if (mListener != null) {
-            mListener.postExecute(this, null);
+            mListener.postExecute(this, response);
         }
     }
 }

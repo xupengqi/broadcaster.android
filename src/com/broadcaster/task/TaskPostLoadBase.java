@@ -20,16 +20,17 @@ public class TaskPostLoadBase extends TaskBase {
         else {
             ((BaseDrawerListActivity)tm.getActivity()).updatePostsList(parsePosts(mResponse), true, true);
         }
-        
+
         super.onPostExecute(tm);
     }
-    
+
     public TaskPostLoadBase setAfterId(Integer afterId) {
         mAfterId = afterId;
         return this;
     }
 
     private ArrayList<PostObj> parsePosts(ResponseObj response) {
+        if (response == null) return new ArrayList<PostObj>();
         ArrayList<PostObj> posts = (new Gson()).fromJson(response.data.get("posts"), new TypeToken<List<PostObj>>(){}.getType());
         return (posts == null) ? new ArrayList<PostObj>() : posts;
     }
