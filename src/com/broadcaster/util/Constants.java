@@ -19,6 +19,8 @@ public class Constants {
     
     public static enum ERROR_TYPE {NO_CONN};
 
+    public static enum API_ERRORS {Unknown, RESOURCE_NOT_FOUND, REQUIRE_LOGIN};
+
     public static enum TASK {
 //        ADD_POST,
 //        UPDATE_POST,
@@ -93,8 +95,6 @@ public class Constants {
     public static final String RESERVED_TAG_OWN = "[[RESERVED_TAG_OWN]]";
     public static final String RESERVED_TAG_EVERYTHING = "[[RESERVED_TAG_EVERYTHING]]";
 //    public static final String RESERVED_TAG_STARRED = "[[RESERVED_TAG_STARRED]]";
-
-    public static enum API_ERRORS {Unknown, RESOURCE_NOT_FOUND, REQUIRE_LOGIN};
 
     public static int TagKey_Post = -1;
 

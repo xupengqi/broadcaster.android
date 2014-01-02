@@ -85,9 +85,9 @@ public class BaseDrawerTabActivity extends BaseDrawerActivity {
             }
             break;
         default:
-            super.showProgress(type);
             break;
         }
+        super.showProgress(type);
     }
 
     @Override
@@ -104,9 +104,9 @@ public class BaseDrawerTabActivity extends BaseDrawerActivity {
             }
             break;
         default:
-            super.hideProgress(type);
             break;
         }
+        super.hideProgress(type);
     }
 
     @Override

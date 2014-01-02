@@ -13,7 +13,7 @@ public class TaskPostLoadByParent extends TaskPostLoadBase {
     @Override
     protected TaskManager doInBackground(TaskManager... args) {
         if (mAfterId != null) {
-            mResponse = BaseActivity.api.getPostsByParent(BaseActivity.api.getAfterParams(BaseActivity.api.getPostsByParentParams(mAfterId), mParentId));
+            mResponse = BaseActivity.api.getPostsByParent(BaseActivity.api.getAfterParams(BaseActivity.api.getPostsByParentParams(mParentId), mAfterId));
         }
         else {
             mResponse = BaseActivity.api.getPostsByParent(BaseActivity.api.getPostsByParentParams(mParentId));

@@ -366,9 +366,9 @@ public class PostNew extends BaseDrawerActivity {
             getActionBar().hide();
             break;
         default:
-            super.showProgress(type);
             break;
         }
+        super.showProgress(type);
     }
 
     @Override
@@ -378,9 +378,9 @@ public class PostNew extends BaseDrawerActivity {
             getActionBar().show();
             break;
         default:
-            super.hideProgress(type);
             break;
         }
+        super.hideProgress(type);
     }
 
     private void insertAudio(final Uri audioFile) {

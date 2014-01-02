@@ -327,7 +327,6 @@ public abstract class BaseDrawerActivity extends BaseActivity {
             }
             break;
         default:
-            super.showProgress(type);
             break;
         }
     }
@@ -341,7 +340,6 @@ public abstract class BaseDrawerActivity extends BaseActivity {
             }
             break;
         default:
-            super.hideProgress(type);
             break;
         }
     }

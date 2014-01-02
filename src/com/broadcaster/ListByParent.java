@@ -144,9 +144,9 @@ public class ListByParent extends BaseDrawerListActivity {
             }
             break;
         default:
-            super.showProgress(type);
             break;
         }
+        super.showProgress(type);
     }
 
     @Override
@@ -158,9 +158,9 @@ public class ListByParent extends BaseDrawerListActivity {
             }
             break;
         default:
-            super.hideProgress(type);
             break;
         }
+        super.hideProgress(type);
     }
 
     private PostObj constructNewPost() {

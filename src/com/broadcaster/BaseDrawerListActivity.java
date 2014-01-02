@@ -501,29 +501,25 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             }
             break;
         default:
-            super.showProgress(type);
             break;
         }
+        super.showProgress(type);
     }
 
+    //TODO: SET BREAKPOINT HERE, THIS IS CALLED TOO MANY TIMES
     @Override
     public void hideProgress(PROGRESS_TYPE type) {
-        switch(type) { //TODO: SET BREAKPOINT HERE, THIS IS CALLED TOO MANY TIMES
+        switch(type) {
         case ACTION:
-            //getActionBar().setDisplayShowTitleEnabled(true);
-            //if (!showLocations) {
-            //    getActionBar().setDisplayShowCustomEnabled(false);
-            //}
-            //if (showLocations) {
-            //    renderActionBarLocations();
-            //}
-            reloadStart = false;
-            getActionBar().setDisplayShowHomeEnabled(true);
-            getActionBar().setDisplayShowCustomEnabled(false);
-            actionBarProgressBar.setIndeterminate(false);
-            invalidateOptionsMenu();
-            actionBarProgressText.setText(R.string.action_bar_swipe);
-            postListView.enableOnTouch();
+            if (reloadStart) {
+                reloadStart = false;
+                getActionBar().setDisplayShowHomeEnabled(true);
+                getActionBar().setDisplayShowCustomEnabled(false);
+                actionBarProgressBar.setIndeterminate(false);
+                invalidateOptionsMenu();
+                actionBarProgressText.setText(R.string.action_bar_swipe);
+                postListView.enableOnTouch();
+            }
             break;
         case INLINE:
             if (footerProgress != null) {
@@ -532,9 +528,9 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             }
             break;
         default:
-            super.hideProgress(type);
             break;
         }
+        super.hideProgress(type);
     }
 
     protected void loadMorePosts() {
