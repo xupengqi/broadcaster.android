@@ -1,9 +1,5 @@
 package com.broadcaster.fragment;
 
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +7,9 @@ import android.view.ViewGroup;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.R;
-import com.broadcaster.util.AccountTaskListener;
-import com.broadcaster.util.TaskUtil;
+import com.broadcaster.task.TaskAccount;
+import com.broadcaster.task.TaskManager;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 
 public class AccountRegister extends AccountBase {
     //private ListView accounts;
@@ -34,8 +31,10 @@ public class AccountRegister extends AccountBase {
         submit.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (validate()) {
-                    List<NameValuePair> params = BaseActivity.api.getRegisterParams(username.getText().toString(), email.getText().toString(), password.getText().toString());
-                    TaskUtil.register(parent, new AccountTaskListener(), params);
+                    (new TaskManager((BaseActivity)getActivity()))
+                    .addTask(new TaskAccount().register(username.getText().toString(), email.getText().toString(), password.getText().toString()))
+                    .setProgress(PROGRESS_TYPE.INLINE)
+                    .run();
                 }
             }
         });

@@ -100,7 +100,7 @@ public class ListByParent extends BaseDrawerListActivity {
             return true;
         case R.id.menu_delete:
             if(info.position == 0) {
-                (new com.broadcaster.task.TaskManager(this))
+                (new TaskManager(this))
                 .addTask((new TaskPostDel(mPost)).setCallback(new TaskListener() {
                     @Override
                     public void postExecute(TaskManager tm, ResponseObj response) {
@@ -112,7 +112,7 @@ public class ListByParent extends BaseDrawerListActivity {
             else {
                 PostObj postToDelete = (PostObj)postListAdapter.getItem(info.position - postListView.getHeaderViewsCount());
                 postToDelete.deleted = true;
-                (new com.broadcaster.task.TaskManager(this))
+                (new TaskManager(this))
                 .addTask(new TaskPostDel(postToDelete))
                 .run();
                 updatePostsList();
@@ -244,7 +244,7 @@ public class ListByParent extends BaseDrawerListActivity {
     }
 
     protected void replyAndLoad() {
-        (new com.broadcaster.task.TaskManager(ListByParent.this))
+        (new TaskManager(ListByParent.this))
         .addTask((new TaskPostReply(constructNewPost())).setCallback(new TaskListener() {
             @Override
             public void postExecute(TaskManager tm, ResponseObj response) {

@@ -7,12 +7,8 @@ import android.view.MenuItem;
 import com.broadcaster.fragment.HelpFAQ;
 import com.broadcaster.fragment.HelpFeedback;
 import com.broadcaster.fragment.HelpGettingStarted;
-import com.broadcaster.model.ResponseObj;
-import com.broadcaster.model.TaskItem;
-import com.broadcaster.util.Constants.TASK_RESULT;
-import com.broadcaster.util.TaskListener;
-import com.broadcaster.util.TaskManager;
-import com.broadcaster.util.TaskUtil;
+import com.broadcaster.task.TaskFeedback;
+import com.broadcaster.task.TaskManager;
 
 public class Help extends BaseDrawerTabActivity {
     protected Menu menu;
@@ -70,7 +66,11 @@ public class Help extends BaseDrawerTabActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_submit:
-            TaskUtil.feedback(this, new HelpTaskListener(), ((HelpFeedback) currentFragments.get(1)).getFeedbackParams());
+            String email = ((HelpFeedback) currentFragments.get(1)).getFeedbackEmail();
+            String feedback = ((HelpFeedback) currentFragments.get(1)).getFeedbackText();
+            (new TaskManager(Help.this))
+            .addTask(new TaskFeedback(email, feedback))
+            .run();
             hideKeyboard();
             return true;
         case R.id.menu_start:
@@ -78,39 +78,6 @@ public class Help extends BaseDrawerTabActivity {
             return true;
         default:
             return super.onOptionsItemSelected(item);
-        }
-    }
-
-    public class HelpTaskListener extends TaskListener {
-        @Override
-        public void onExecute(TaskItem ti, TaskManager mgr) {
-            ResponseObj response;
-            switch(ti.task) {
-            case FEEDBACK:
-                response = api.feedback(ti.params);
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, response);
-                break;
-            default:
-                break;
-            }
-        }
-
-        @Override
-        public void onPostExecute(TaskItem ti, TaskManager mgr) {
-            ResponseObj response = mgr.getResultRawHTTPResponse();
-            switch(ti.task) {
-            case FEEDBACK:
-                if(response.hasError()) {
-                    showError(this.toString(), response.getError());
-                }
-                else {
-                    showToast("Thanks for your feedback!");
-                    finish();
-                }
-                break;
-            default:
-                break;
-            }
         }
     }
 }

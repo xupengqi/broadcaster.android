@@ -19,15 +19,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.broadcaster.model.ResponseObj;
-import com.broadcaster.model.TaskItem;
-import com.broadcaster.model.UserObj;
 import com.broadcaster.model.GeocodeResponse.GRAddress;
-import com.broadcaster.util.AccountTaskListener;
-import com.broadcaster.util.Constants.TASK_RESULT;
-import com.broadcaster.util.TaskListener;
-import com.broadcaster.util.TaskManager;
-import com.broadcaster.util.TaskUtil;
+import com.broadcaster.model.ResponseObj;
+import com.broadcaster.model.UserObj;
+import com.broadcaster.task.TaskBase.TaskListener;
+import com.broadcaster.task.TaskAccount;
+import com.broadcaster.task.TaskManager;
+import com.broadcaster.task.TaskUpdateAccount;
+import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.view.LocationSettings;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.plus.PlusClient.OnAccessRevokedListener;
@@ -88,13 +87,17 @@ public class Settings extends BaseDrawerActivity {
                         // Trigger app logic to comply with the developer policies
                     }
                 });
-                TaskUtil.removeGPlus(Settings.this, new AccountTaskListener());
+                (new TaskManager(Settings.this))
+                .addTask((new TaskAccount()).removeGoogle())
+                .run();
             }
         });
         removeFB.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                TaskUtil.removeFB(Settings.this, new AccountTaskListener());
+                (new TaskManager(Settings.this))
+                .addTask((new TaskAccount()).removeFB())
+                .run();
             }
         });
         starred.setOnClickListener(new OnClickListener() {
@@ -124,7 +127,28 @@ public class Settings extends BaseDrawerActivity {
                     .setCancelable(false)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            TaskUtil.updateUsername(Settings.this, new SettingsListener(), api.getUpdateUsernameParams(pref.getUser(), username.getText().toString()));
+                            usernameUpdate.setVisibility(View.INVISIBLE);
+                            usernameProgress.setVisibility(View.VISIBLE);
+                            (new TaskManager(Settings.this))
+                            .addTask((new TaskUpdateAccount()).updateUsername(username.getText().toString()).setCallback(new TaskListener() {
+                                @Override
+                                public void postExecute(TaskManager tm, ResponseObj response) {
+                                    if(!response.hasError()) {
+                                        showToast("Username successfully updated.");
+                                        UserObj user = pref.getUser();
+                                        user.username = username.getText().toString();
+                                        user.usernameChange++;
+                                        pref.setUser(user);
+                                        renderChangeUsername();
+                                    }
+                                    else {
+                                        usernameUpdate.setVisibility(View.VISIBLE);
+                                    }
+                                    usernameProgress.setVisibility(View.GONE);
+                                }
+                            }))
+                            .setProgress(PROGRESS_TYPE.INLINE)
+                            .run();
                         }
                     })
                     .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -140,13 +164,45 @@ public class Settings extends BaseDrawerActivity {
         emailUpdate.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                TaskUtil.updateEmail(Settings.this, new SettingsListener(), api.getUpdateEmailParams(pref.getUser(), email.getText().toString()));
+                emailUpdate.setVisibility(View.INVISIBLE);
+                emailProgress.setVisibility(View.VISIBLE);
+                (new TaskManager(Settings.this))
+                .addTask((new TaskUpdateAccount()).updateEmail(email.getText().toString()).setCallback(new TaskListener() {
+                    @Override
+                    public void postExecute(TaskManager tm, ResponseObj response) {
+                        //TODO: CHANGE EMAIL, USERNAME, PASSWORD PROGRESS INTO PROGRESS FUNCTIONS CALLED BY TM
+                        emailUpdate.setVisibility(View.VISIBLE);
+                        emailProgress.setVisibility(View.GONE);
+                        if(!response.hasError()) {
+                            showToast("Email successfully updated.");
+                            UserObj user = pref.getUser();
+                            user.email = email.getText().toString();
+                            pref.setUser(user);
+                        }
+                    }
+                }))
+                .setProgress(PROGRESS_TYPE.INLINE)
+                .run();
             }
         });
         passwordUpdate.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                TaskUtil.updatePassword(Settings.this, new SettingsListener(), api.getUpdatePasswordParams(pref.getUser(), password.getText().toString()));
+                passwordUpdate.setVisibility(View.INVISIBLE);
+                passwordProgress.setVisibility(View.VISIBLE);
+                (new TaskManager(Settings.this))
+                .addTask((new TaskUpdateAccount()).updateEmail(password.getText().toString()).setCallback(new TaskListener() {
+                    @Override
+                    public void postExecute(TaskManager tm, ResponseObj response) {
+                        passwordUpdate.setVisibility(View.VISIBLE);
+                        passwordProgress.setVisibility(View.GONE);
+                        if(!response.hasError()) {
+                            showToast("Password successfully updated.");
+                        }
+                    }
+                }))
+                .setProgress(PROGRESS_TYPE.INLINE)
+                .run();
             }
         });
         errorReport.setOnCheckedChangeListener(new OnCheckedChangeListener () {
@@ -212,8 +268,8 @@ public class Settings extends BaseDrawerActivity {
             }
         }
         else {
-            for(int i=0; i<locationSetting.gr.results.size(); i++) {
-                GRAddress addr = locationSetting.gr.results.get(i);
+            for(int i=0; i<locationSetting.addresses.size(); i++) {
+                GRAddress addr = locationSetting.addresses.get(i);
                 menu.add(0, i, i, addr.formatted_address);
             }
         }
@@ -226,7 +282,7 @@ public class Settings extends BaseDrawerActivity {
             locationSetting.addLocation(loc.getAddressLine(0), loc.getLatitude(), loc.getLongitude());
         }
         else {
-            GRAddress loc = locationSetting.gr.results.get(item.getItemId());
+            GRAddress loc = locationSetting.addresses.get(item.getItemId());
             locationSetting.addLocation(loc.formatted_address, loc.getLat(), loc.getLng());
         }
         return true;
@@ -235,95 +291,5 @@ public class Settings extends BaseDrawerActivity {
     @Override
     protected int getContentView() {
         return R.layout.activity_settings;
-    }
-
-    public class SettingsListener extends TaskListener {
-        /*@Override
-        //TODO: FIX THIS
-        public void onPreExecute(TaskItem ti, TaskManager mgr) {
-            super.onPreExecute(ti, mgr);
-
-            switch(ti.task) {
-            case UPDATE_USERNAME:
-                usernameUpdate.setVisibility(View.INVISIBLE);
-                usernameProgress.setVisibility(View.VISIBLE);
-                break;
-            case UPDATE_EMAIL:
-                emailUpdate.setVisibility(View.INVISIBLE);
-                emailProgress.setVisibility(View.VISIBLE);
-                break;
-            case UPDATE_PASSWORD:
-                passwordUpdate.setVisibility(View.INVISIBLE);
-                passwordProgress.setVisibility(View.VISIBLE);
-                break;
-            default:
-                break;
-            }
-        }*/
-
-        @Override
-        public void onExecute(TaskItem ti, TaskManager mgr) {
-            super.onExecute(ti, mgr);
-
-            switch(ti.task) {
-            case UPDATE_USERNAME:
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, api.updateUsername(ti.params));
-                break;
-            case UPDATE_EMAIL:
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, api.updateEmail(ti.params));
-                break;
-            case UPDATE_PASSWORD:
-                mgr.putResult(TASK_RESULT.RAW_HTTP_RESPONSE, api.updatePassword(ti.params));
-                break;
-            default:
-                break;
-            }
-        }
-
-        @Override
-        public void onPostExecute(TaskItem ti, TaskManager mgr) {
-            super.onPostExecute(ti, mgr);
-            ResponseObj response = mgr.getResultRawHTTPResponse();
-
-            if(response.hasError()) {
-                showError(this.toString(), response.getReadableError(ti.task));
-            }
-
-            switch(ti.task) {
-            case UPDATE_USERNAME:
-                if(!response.hasError()) {
-                    showToast("Username successfully updated.");
-                    UserObj user = pref.getUser();
-                    user.username = username.getText().toString();
-                    user.usernameChange++;
-                    pref.setUser(user);
-                    renderChangeUsername();
-                }
-                else {
-                    usernameUpdate.setVisibility(View.VISIBLE);
-                }
-                usernameProgress.setVisibility(View.GONE);
-                break;
-            case UPDATE_EMAIL:
-                emailUpdate.setVisibility(View.VISIBLE);
-                emailProgress.setVisibility(View.GONE);
-                if(!response.hasError()) {
-                    showToast("Email successfully updated.");
-                    UserObj user = pref.getUser();
-                    user.email = email.getText().toString();
-                    pref.setUser(user);
-                }
-                break;
-            case UPDATE_PASSWORD:
-                passwordUpdate.setVisibility(View.VISIBLE);
-                passwordProgress.setVisibility(View.GONE);
-                if(!response.hasError()) {
-                    showToast("Password successfully updated.");
-                }
-                break;
-            default:
-                break;
-            }
-        }
     }
 }

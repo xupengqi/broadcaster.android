@@ -1,15 +1,11 @@
 package com.broadcaster.view;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.location.Address;
-import android.location.Geocoder;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,18 +23,16 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.R;
-import com.broadcaster.model.GeocodeResponse;
 import com.broadcaster.model.GeocodeResponse.GRAddress;
 import com.broadcaster.model.LocationObj;
 import com.broadcaster.model.ResponseObj;
-import com.broadcaster.model.TaskItem;
+import com.broadcaster.task.TaskBase.TaskListener;
+import com.broadcaster.task.TaskGeocode;
+import com.broadcaster.task.TaskGeocode.TaskGeocodeListener;
 import com.broadcaster.task.TaskGetLocation;
+import com.broadcaster.task.TaskManager;
 import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.LocationUtil;
-import com.broadcaster.util.TaskListener;
-import com.broadcaster.util.TaskManager;
-import com.broadcaster.util.TaskUtil;
-import com.broadcaster.util.Util;
 
 public class LocationSettings extends LinearLayout {
     private BaseActivity activity;
@@ -55,9 +49,9 @@ public class LocationSettings extends LinearLayout {
     private SeekBar radiusBar;
     private TextView radiusText;
     private TextView editLocations;
-    public GeocodeResponse gr;
     private List<LocationObj> savedLocations;
     public List<Address> locations;
+    public List<GRAddress> addresses;
 
     private boolean enableAddRemove;
     private boolean enableRadius;
@@ -183,10 +177,10 @@ public class LocationSettings extends LinearLayout {
     }
 
     protected void getLocation() {
-        (new com.broadcaster.task.TaskManager(activity))
-        .addTask(new TaskGetLocation().setCallback(new com.broadcaster.task.TaskBase.TaskListener() {
+        (new TaskManager(activity))
+        .addTask(new TaskGetLocation().setCallback(new TaskListener() {
             @Override
-            public void postExecute(com.broadcaster.task.TaskManager tm, ResponseObj response) {
+            public void postExecute(TaskManager tm, ResponseObj response) {
                 LocationObj loc = BaseActivity.pref.getRealLocation();
                 currentLocationSelect.setText(loc.name);
             }
@@ -223,7 +217,41 @@ public class LocationSettings extends LinearLayout {
         String address = addLocationText.getText().toString();
         if (address.length() > 2) {
             //TODO: SHOW ACTION BAR PROGRESS
-            TaskUtil.getAddress(activity, new LocationSettingsListener(), address);
+            locations = null;
+            addresses = null;
+            (new TaskManager(activity))
+            .addTask(new TaskGeocode(address).setCallback(new TaskGeocodeListener() {
+                @Override
+                public void postExecute1(List<Address> locations) {
+                    LocationSettings.this.locations = locations;
+                    if (locations.size() > 1) {
+                        activity.openContextMenu(addLocationText);
+                    }
+                    else if (locations.size() == 1) {
+                        Address loc = locations.get(0);
+                        addLocation(loc.getAddressLine(0), loc.getLatitude(), loc.getLongitude());
+                    }
+                    else {
+                        activity.showError(this.toString(), "No matching location found.");
+                    }
+                }
+                @Override
+                public void postExecute2(List<GRAddress> addresses) {
+                    LocationSettings.this.addresses = addresses;
+                    if (addresses.size() > 1) {
+                        activity.openContextMenu(addLocationText);
+                    }
+                    else if (addresses.size() == 1) {
+                        GRAddress loc = addresses.get(0);
+                        addLocation(loc.formatted_address, loc.getLat(), loc.getLng());
+                    }
+                    else {
+                        activity.showError(this.toString(), "No matching location found.");
+                    }
+                }
+            }))
+            .setProgress(PROGRESS_TYPE.INLINE)
+            .run();
         }
     }
 
@@ -276,67 +304,5 @@ public class LocationSettings extends LinearLayout {
             }
         });
         savedLocationsGroup.addView(locationItemView);
-    }
-
-    public class LocationSettingsListener extends TaskListener {
-        @Override
-        public void onExecute(TaskItem ti, TaskManager mgr) {
-            super.onExecute(ti, mgr);
-
-            switch(ti.task) {
-            case GET_ADDRESS:
-                locations = null;
-                gr = null;
-
-                try {
-                    Geocoder gcd = new Geocoder(mgr.activity, Locale.getDefault());
-                    locations = gcd.getFromLocationName(ti.extra.toString(), 10);
-                } catch (IOException e) {
-                    Util.logError(mgr.activity, e);
-                    Log.i(this.toString(), "---------unable to use geocoder, using http request now---------");
-                    gr = BaseActivity.api.sendGeocodeRequest(BaseActivity.api.getGeocodeRequestParams((String) ti.extra));
-                }
-                break;
-            default:
-                break;
-            }
-        }
-
-        @Override
-        public void onPostExecute(TaskItem ti, TaskManager mgr) {
-            super.onPostExecute(ti, mgr);
-
-            switch(ti.task) {
-            case GET_ADDRESS:
-                if (locations != null) {
-                    if (locations.size() > 1) {
-                        activity.openContextMenu(addLocationText);
-                    }
-                    else if (locations.size() == 1) {
-                        Address loc = locations.get(0);
-                        addLocation(loc.getAddressLine(0), loc.getLatitude(), loc.getLongitude());
-                    }
-                    else {
-                        activity.showError(this.toString(), "No matching location found.");
-                    }
-                }
-                if (gr != null) {
-                    if (gr.results.size() > 1) {
-                        activity.openContextMenu(addLocationText);
-                    }
-                    else if (gr.results.size() == 1) {
-                        GRAddress loc = gr.results.get(0);
-                        addLocation(loc.formatted_address, loc.getLat(), loc.getLng());
-                    }
-                    else {
-                        activity.showError(this.toString(), "No matching location found.");
-                    }
-                }
-                //TODO: HIDE ACTIONBAR PROGRESS
-                break;
-            default:
-                break;
-            }
-        }
     }
 }

@@ -55,7 +55,7 @@ public class Topics extends BaseDrawerActivity {
     }
 
     private void refreshTopics() {
-        (new com.broadcaster.task.TaskManager(this))
+        (new TaskManager(this))
         .addTask((new TaskGetTopics()).setCallback(new TaskListener() {
             @Override
             public void postExecute(TaskManager tm, ResponseObj response) {

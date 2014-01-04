@@ -1,16 +1,11 @@
 package com.broadcaster.fragment;
 
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.broadcaster.BaseActivity;
 import com.broadcaster.R;
 
 public class HelpFeedback extends HelpBase {
@@ -32,7 +27,11 @@ public class HelpFeedback extends HelpBase {
         return R.layout.fragment_help_feedback;
     }
     
-    public List<NameValuePair> getFeedbackParams() {
-        return BaseActivity.api.getFeedbackParams(email.getText().toString(), text.getText().toString());
+    public String getFeedbackText() {
+        return text.getText().toString();
+    }
+    
+    public String getFeedbackEmail() {
+        return email.getText().toString();
     }
 }

@@ -3,8 +3,6 @@ package com.broadcaster.model;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
 import android.app.Activity;
 import android.content.Context;
@@ -20,13 +18,12 @@ import android.widget.LinearLayout;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.R;
+import com.broadcaster.task.TaskDownload;
+import com.broadcaster.task.TaskDownload.TaskDownloadListener;
+import com.broadcaster.task.TaskManager;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
-import com.broadcaster.util.Constants.TASK;
-import com.broadcaster.util.Constants.TASK_RESULT;
 import com.broadcaster.util.ImageUtil;
-import com.broadcaster.util.TaskListener;
-import com.broadcaster.util.TaskManager;
 import com.broadcaster.util.Util;
 
 public class AttachObj implements Serializable {
@@ -83,12 +80,14 @@ public class AttachObj implements Serializable {
     }
 
     public static void renderAttachment(final BaseActivity context, final PostObj post, final String file, final AttachObj attachObj, final MEDIA_TYPE type, final View attachmentsView, final boolean create, final AttachmentInteractListener l) throws MalformedURLException, IOException {
-        downloadAttachThumb(context, attachObj, new DownloadImgListener () {
+        (new TaskManager(context))
+        .addTask((new TaskDownload(attachObj).setCallback(new TaskDownloadListener() {
             @Override
-            public void onDownload(Bitmap bm) {
-                renderAttachment(context, post, file, attachObj, type, bm, attachmentsView, create, l);
+            public void postExecute(Bitmap bitmap) {
+                renderAttachment(context, post, file, attachObj, type, bitmap, attachmentsView, create, l);
             }
-        });
+        })))
+        .run();
     }
 
     public static void renderAttachment(Activity context, PostObj post, String file, AttachObj attachObj, MEDIA_TYPE type, Object thumbnail, View view, boolean create, final AttachmentInteractListener l) {
@@ -181,36 +180,6 @@ public class AttachObj implements Serializable {
     public interface AttachmentInteractListener {
         public void onOpen(View v);
         public boolean onDelete(View v);
-    }
-
-    public static void downloadAttachThumb(final BaseActivity context, final AttachObj att, final DownloadImgListener l) {
-        TaskManager.getExecuter(context, new TaskListener() {
-            @Override
-            public void onExecute(TaskItem ti, TaskManager mgr) {
-                Bitmap response = null;
-                try {
-                    String url = att.getFileUrl();
-                    if (att.type == MEDIA_TYPE.VIDEO) {
-                        url = att.getThumbURL();
-                    }
-                    URLConnection connection = new URL(url).openConnection();
-                    connection.setUseCaches(true);
-                    response = BitmapFactory.decodeStream(connection.getInputStream());
-                } catch (Exception e) {
-                    Util.logError(context, e);
-                    if (att.type == MEDIA_TYPE.VIDEO) {
-                        response = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_action_video_light);
-                    }
-                }
-                mgr.putResult(TASK_RESULT.ANY, response);
-            }
-
-            @Override
-            public void onPostExecute(TaskItem ti, TaskManager mgr) {
-                Bitmap thumb = (Bitmap)mgr.getResult(TASK_RESULT.ANY);
-                l.onDownload(thumb);
-            }
-        }).addTask(TASK.DOWNLOAD).begin();
     }
 
     public interface DownloadImgListener {

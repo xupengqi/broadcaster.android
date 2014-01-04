@@ -143,7 +143,7 @@ public class PostNew extends BaseDrawerActivity {
         attachImage.setOnClickListener(openContext);
         attachVideo.setOnClickListener(openContext);
         initProgressElements();
-        (new com.broadcaster.task.TaskManager(this))
+        (new TaskManager(this))
         .addTask((new TaskGetLocation()).setCallback(new TaskListener() {
             @Override
             public void postExecute(TaskManager tm, ResponseObj response) {
@@ -237,7 +237,7 @@ public class PostNew extends BaseDrawerActivity {
     }
 
     protected void submitPost(Queue<TaskBase> attachmentTasks) {
-        (new com.broadcaster.task.TaskManager(PostNew.this))
+        (new TaskManager(PostNew.this))
         .addTask(new TaskPostNew(constructNewPost()))
         .addTask(attachmentTasks)
         .setCallback(getSubmitCallback())

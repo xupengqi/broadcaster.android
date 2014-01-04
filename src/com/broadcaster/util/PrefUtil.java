@@ -334,6 +334,5 @@ public class PrefUtil {
         editor.remove(KEY_POSTS_PREFIX+Constants.RESERVED_TAG_OWN);
         editor.commit();
         clearSelectedTags();
-        clearRealLocation();
     }
 }

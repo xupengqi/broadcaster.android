@@ -1,9 +1,5 @@
 package com.broadcaster.fragment;
 
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-
 import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,8 +9,8 @@ import android.view.ViewGroup;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.R;
-import com.broadcaster.util.AccountTaskListener;
-import com.broadcaster.util.TaskUtil;
+import com.broadcaster.task.TaskAccount;
+import com.broadcaster.task.TaskManager;
 
 public class AccountLogin extends AccountBase {
 
@@ -24,8 +20,9 @@ public class AccountLogin extends AccountBase {
 
         submit.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                List<NameValuePair> params = BaseActivity.api.getLoginParams(username.getText().toString(), password.getText().toString());
-                TaskUtil.login(parent, new AccountTaskListener(), params);
+                (new TaskManager((BaseActivity)getActivity()))
+                .addTask((new TaskAccount()).login(username.getText().toString(), password.getText().toString()))
+                .run();
             }
         });
 

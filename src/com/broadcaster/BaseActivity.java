@@ -17,24 +17,25 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.broadcaster.util.AccountTaskListener;
+import com.broadcaster.task.TaskAccount;
+import com.broadcaster.task.TaskManager;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.PROGRESS_TYPE;
-import com.broadcaster.util.Constants.TASK;
 import com.broadcaster.util.PrefUtil;
 import com.broadcaster.util.RestAPI;
-import com.broadcaster.util.TaskUtil;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.plus.PlusClient;
+import com.google.android.gms.plus.model.people.Person;
 
 public abstract class BaseActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener  {
     public static RestAPI api;
@@ -72,7 +73,9 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
                         @Override
                         public void onCompleted(GraphUser user, Response response) {
                             if (user != null) {
-                                TaskUtil.loginFBUser(BaseActivity.this, new AccountTaskListener(), user.getId(), user.getUsername(), user.asMap().get("email").toString(), session.getAccessToken());
+                                (new TaskManager(BaseActivity.this))
+                                .addTask((new TaskAccount()).loginFB(user.getId(), user.getUsername(), user.asMap().get("email").toString(), session.getAccessToken()))
+                                .run();
                             }
                         }
                     }).executeAsync();
@@ -304,30 +307,6 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
         Toast.makeText(this, toast, Toast.LENGTH_LONG).show();
     }
 
-//    public void onGetRealLocation() { }
-
-    protected CharSequence getTaskMessage(TASK task) {
-        switch(task) {
-//        case GET_TAGS:
-//            return "Getting all tags from server...";
-//        case GET_LOCATION:
-//        case GET_REAL_LOCATION:
-//            return "Getting location...";
-//        case LOAD_POSTS:
-//            return "Getting new posts...";
-//        case LOAD_POSTS_FROM_CACHE:
-//            return "Loading posts from cache...";
-//        case LOAD_MORE_POSTS:
-//            return "Getting new posts...";
-        case LOGIN:
-            return "Authenticating with server...";
-        case DOWNLOAD:
-            return "";
-        default:
-            return task.toString();
-        }
-    }
-
     public void hideKeyboard() {
         if (getCurrentFocus() != null) {
             InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE); 
@@ -350,7 +329,19 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
         // We've resolved any connection errors.
         mConnectionProgressDialog.dismiss();
         if(!isLoggedIn()) {
-            TaskUtil.loginGPlusUser(BaseActivity.this, new AccountTaskListener(), mPlusClient.getAccountName());
+            String token = null;
+            try {
+                token = GoogleAuthUtil.getToken(
+                        BaseActivity.this,
+                        mPlusClient.getAccountName(),
+                        "oauth2:" + Scopes.PLUS_LOGIN);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Person me = mPlusClient.getCurrentPerson();
+            (new TaskManager(BaseActivity.this))
+            .addTask((new TaskAccount()).loginGoogle(me, token))
+            .run();
         }
     }
 

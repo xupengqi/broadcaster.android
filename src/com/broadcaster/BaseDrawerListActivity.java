@@ -30,17 +30,16 @@ import android.widget.TextView;
 import com.broadcaster.model.PostObj;
 import com.broadcaster.model.PostViewHolder;
 import com.broadcaster.model.ResponseObj;
-import com.broadcaster.model.TaskItem;
+import com.broadcaster.task.TaskBase.TaskListener;
 import com.broadcaster.task.TaskGetLocation;
 import com.broadcaster.task.TaskGetTopics;
+import com.broadcaster.task.TaskManager;
 import com.broadcaster.task.TaskPostDel;
 import com.broadcaster.task.TaskPostLoadBase;
 import com.broadcaster.task.TaskPostUnDel;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.POST_LIST_TYPE;
 import com.broadcaster.util.Constants.PROGRESS_TYPE;
-import com.broadcaster.util.TaskListener;
-import com.broadcaster.util.TaskManager;
 import com.broadcaster.util.Util;
 import com.broadcaster.view.ListViewWithOverScroll;
 import com.broadcaster.view.ListViewWithOverScroll.OnOverScrollActionListener;
@@ -319,7 +318,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             PostObj postToDelete = (PostObj)postListAdapter.getItem(info.position - postListView.getHeaderViewsCount());
             postToDelete.deleted = true;
 
-            (new com.broadcaster.task.TaskManager(this))
+            (new TaskManager(this))
             .addTask(new TaskPostDel(postToDelete))
             .run();
 
@@ -413,27 +412,11 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
 
     public void undoDelete(PostObj post) {
         post.deleted = false;
-        (new com.broadcaster.task.TaskManager(this))
+        (new TaskManager(this))
         .addTask(new TaskPostUnDel(post))
         .setProgress(PROGRESS_TYPE.ACTION)
         .run();
         updatePostsList();
-    }
-
-    public class ActivityListTaskListenerBase extends TaskListener {
-
-        @Override
-        public void onPostExecute(TaskItem ti, TaskManager mgr) {
-            super.onPostExecute(ti, mgr);
-
-            ResponseObj response = mgr.getResultRawHTTPResponse();
-
-            if(response.hasError()) {
-                showError(this+":onPostExecute", response.getError());
-            }
-            else {
-            }
-        }
     }
 
     protected int getLastId() {
@@ -472,7 +455,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         }
         else {
             Util.debug(this, "Refreshing posts.");
-            (new com.broadcaster.task.TaskManager(BaseDrawerListActivity.this))
+            (new TaskManager(BaseDrawerListActivity.this))
             .addTask(getLoadPostTask())
             .setProgress(PROGRESS_TYPE.INLINE)
             .run();
@@ -537,18 +520,18 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         TaskPostLoadBase task = getLoadPostTask();
         task.setAfterId(getLastId());
 
-        (new com.broadcaster.task.TaskManager(this))
+        (new TaskManager(this))
         .addTask(task)
         .setProgress(PROGRESS_TYPE.INLINE)
         .run();
     }
 
     private void refreshPosts() {
-        (new com.broadcaster.task.TaskManager(this))
+        (new TaskManager(this))
         .addTask(new TaskGetLocation())
-        .addTask((new TaskGetTopics()).setCallback(new com.broadcaster.task.TaskBase.TaskListener() {
+        .addTask((new TaskGetTopics()).setCallback(new TaskListener() {
             @Override
-            public void postExecute(com.broadcaster.task.TaskManager tm, ResponseObj response) {
+            public void postExecute(TaskManager tm, ResponseObj response) {
                 constructTopicsSpinner();
                 invalidateOptionsMenu();
             }

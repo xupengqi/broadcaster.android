@@ -16,8 +16,8 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.broadcaster.BaseActivity;
-import com.broadcaster.model.TaskItem;
-import com.broadcaster.util.Constants.TASK;
+import com.broadcaster.task.TaskManager;
+import com.broadcaster.task.TaskReportError;
 
 public class Util {
 
@@ -60,12 +60,9 @@ public class Util {
 
     public static void logError(BaseActivity context, final Exception e) {
         if (BaseActivity.pref.sendErrorAllowed()) {
-            TaskManager.getExecuter(context, new TaskListener() {
-                @Override
-                public void onExecute(TaskItem ti, TaskManager mgr) {
-                    BaseActivity.api.sendError(e);
-                }
-            }).addTask(TASK.SEND_ERROR).begin();
+            (new TaskManager(context))
+            .addTask(new TaskReportError(e))
+            .run();
         }
         else {
             BaseActivity.pref.addError(e);
