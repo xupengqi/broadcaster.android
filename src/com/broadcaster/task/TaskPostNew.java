@@ -6,10 +6,10 @@ import org.apache.http.NameValuePair;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.model.PostObj;
-import com.broadcaster.util.Constants.TASK_RESULT;
 
 public class TaskPostNew extends TaskBase {
     private PostObj mPo;
+    
 
     public TaskPostNew (PostObj po) {
         mPo = po;
@@ -27,7 +27,7 @@ public class TaskPostNew extends TaskBase {
     @Override
     protected void onPostExecute(TaskManager tm) {
         if (!mResponse.hasError()) {
-            tm.putResult(TASK_RESULT.POSTID, mResponse.data.get("postId").getAsInt());
+            mPo.id = mResponse.data.get("postId").getAsInt();
         }
         super.onPostExecute(tm);
     }

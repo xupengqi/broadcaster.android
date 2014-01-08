@@ -29,7 +29,6 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
-import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -40,7 +39,7 @@ import com.google.android.gms.plus.model.people.Person;
 public abstract class BaseActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener  {
     public static RestAPI api;
     public static PrefUtil pref;
-    protected boolean reloadStart = false;
+    protected boolean isShowingActionProgress = false;
 
     protected UiLifecycleHelper uiHelper;
     protected static Session session;
@@ -159,7 +158,7 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if(reloadStart) {
+        if(isShowingActionProgress) {
             for (int i = 0; i < menu.size(); i++) {
                 MenuItem item = menu.getItem(i);
                 item.setVisible(false);
@@ -329,18 +328,9 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
         // We've resolved any connection errors.
         mConnectionProgressDialog.dismiss();
         if(!isLoggedIn()) {
-            String token = null;
-            try {
-                token = GoogleAuthUtil.getToken(
-                        BaseActivity.this,
-                        mPlusClient.getAccountName(),
-                        "oauth2:" + Scopes.PLUS_LOGIN);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             Person me = mPlusClient.getCurrentPerson();
             (new TaskManager(BaseActivity.this))
-            .addTask((new TaskAccount()).loginGoogle(me, token))
+            .addTask((new TaskAccount()).loginGoogle(me, mPlusClient.getAccountName()))
             .run();
         }
     }

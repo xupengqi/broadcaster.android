@@ -12,6 +12,7 @@ import com.broadcaster.util.Util;
 
 public class ListViewWithOverScroll extends ListView {
     public boolean interceptOnTouch = true;
+    public boolean overScrollEnabled = true;
     
     private OnOverScrollActionListener mOnOverScrollAction = null;
     private boolean endOfY = false;
@@ -66,7 +67,7 @@ public class ListViewWithOverScroll extends ListView {
                 startY = y;
             }
             
-            if (y > startY && endOfY) {
+            if (y > startY && endOfY && overScrollEnabled) {
                 if (!started) {
                     started = true;
                     mOnOverScrollAction.onOverScrollStart();
@@ -95,6 +96,14 @@ public class ListViewWithOverScroll extends ListView {
     public void enableOnTouch() {
         interceptOnTouch = true;
         resetCounters();
+    }
+    
+    public void disableOverscroll() {
+        overScrollEnabled = false;
+    }
+    
+    public void enableOverscroll() {
+        overScrollEnabled = true;
     }
 
     public void setOnOverScrollActionListener(OnOverScrollActionListener listener) {

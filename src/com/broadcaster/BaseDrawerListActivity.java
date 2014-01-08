@@ -23,7 +23,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -43,33 +42,30 @@ import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.Util;
 import com.broadcaster.view.ListViewWithOverScroll;
 import com.broadcaster.view.ListViewWithOverScroll.OnOverScrollActionListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class BaseDrawerListActivity extends BaseDrawerActivity {
-    protected POST_LIST_TYPE mListType;
-    protected String currentLocation;
-    protected List<PostObj> currentPosts;
+    private POST_LIST_TYPE mListType;
+    private List<PostObj> currentPosts;
     protected ArrayAdapter<PostObj> postListAdapter;
     protected ListViewWithOverScroll postListView;
-    protected PostViewHolder headerViewHolder;
-    protected View footerView;
-    protected LinearLayout footerProgress;
-    protected TextView footerText;
     protected Button footerButton;
+    private View footerView;
+    private LinearLayout footerProgress;
+    private TextView footerText;
+
+    private Spinner topicsSpinner;
+    private ArrayAdapter<String> topicsSpinnerAdapter;
+    private List<String> topicSpinnerItems;
+    private boolean spinnerCreated;
+    private boolean haveMoreToLoad = true;
+    private boolean isLoadingMore = false;
     //    protected Spinner locations;
     //    protected List<String> locationNames;
     //    protected ArrayAdapter<String> locationsAdapter;
     //    protected int viewingLocationPosition;
-
-    protected Spinner topicsSpinner;
-    protected ArrayAdapter<String> topicsSpinnerAdapter;
-    protected List<String> topicSpinnerItems;
-    protected boolean spinnerCreated;
-    protected boolean haveMoreToLoad = true;
     //    protected boolean showLocations = false;
-
-    private ProgressBar actionBarProgressBar;
-    private TextView actionBarProgressText;
-    private boolean mActionBarProgressIndeterminate = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,21 +122,23 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             @Override
             public void onOverScrollReload() {
                 postListView.disableOnTouch();
-                refreshPosts(); //TODO: CALLING THIS WILL CALL showProgressAction AGAIN WHICH IS ALREADY CALLED IN onOverScrollStart
+                refreshPosts();
             }
 
             @Override
             public void onOverScrollLoadMore() {
-                if (haveMoreToLoad) {
+                if (haveMoreToLoad && !isLoadingMore) {
                     loadMorePosts();
                 }
             }
 
             @Override
             public void onOverScrollStart() {
-                mActionBarProgressIndeterminate = false;
-                showProgress(PROGRESS_TYPE.ACTION);
-                mActionBarProgressIndeterminate = true;
+                if (!isShowingActionProgress) {
+                    mActionBarProgressIndeterminate = false;
+                    showProgress(PROGRESS_TYPE.ACTION);
+                    mActionBarProgressIndeterminate = true;
+                }
             }
 
             @Override
@@ -381,7 +379,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             currentPosts.clear();
         }
         currentPosts.addAll(loadedPosts);
-        if(currentPosts.size() < Constants.POST_PAGE_SIZE) {
+        if(loadedPosts.size() < Constants.POST_PAGE_SIZE) {
             haveMoreToLoad = false;
             hideProgress(PROGRESS_TYPE.INLINE);
         }
@@ -427,26 +425,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         return lastId;
     }
 
-    // TODO: LINE actionBarProgressText.setText(getTaskMessage(task)); 
-    //10-27 19:05:00.762: E/AndroidRuntime(30769): Caused by: android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.BaseDrawerListActivity.setProgressText(BaseDrawerListActivity.java:347)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager.begin(TaskManager.java:104)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.Util.logError(Util.java:66)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.obj.AttachObj$5.onExecute(AttachObj.java:183)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager$TaskRunner.doInBackground(TaskManager.java:156)
-    //10-27 19:05:00.762: E/AndroidRuntime(30769):    at com.broadcaster.util.TaskManager$TaskRunner.doInBackground(TaskManager.java:1)
-    @Override
-    public void setProgressText(String text) {
-        super.setProgressText(text);
-        if (footerText != null) {
-            footerText.setText(text);
-        }
-        //TODO: BaseDrawerTabAtivity should also have action bar progress?
-        if (actionBarProgressText != null) {
-            actionBarProgressText.setText(text);
-        }
-    }
-
     protected void loadPosts() {
         List<PostObj> cachedPosts = pref.getPosts(getCurrentListType());
         if (cachedPosts.size() > 0) {
@@ -454,79 +432,12 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             updatePostsList(cachedPosts, false, false);
         }
         else {
-            Util.debug(this, "Refreshing posts.");
-            (new TaskManager(BaseDrawerListActivity.this))
-            .addTask(getLoadPostTask())
-            .setProgress(PROGRESS_TYPE.INLINE)
-            .run();
+            refreshPosts();
         }
-    }
-
-    @Override
-    public void showProgress(PROGRESS_TYPE type) {
-        switch(type) {
-        case ACTION:
-            getActionBar().setCustomView(R.layout.module_cab);
-            getActionBar().setDisplayShowHomeEnabled(false);
-            getActionBar().setDisplayShowCustomEnabled(true);
-            //getActionBar().setDisplayShowTitleEnabled(false);
-            reloadStart = true;
-            invalidateOptionsMenu(); // this will call onPrepareOptionsMenu()
-            actionBarProgressText = (TextView) getActionBar().getCustomView().findViewById(R.id.action_bar_text);
-            actionBarProgressBar = (ProgressBar) getActionBar().getCustomView().findViewById(R.id.action_bar_progress);
-            actionBarProgressBar.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-            actionBarProgressBar.setIndeterminate(mActionBarProgressIndeterminate);
-            break;
-        case INLINE:
-            if (footerProgress != null) {
-                footerProgress.setVisibility(View.VISIBLE);
-                footerButton.setVisibility(View.GONE);
-            }
-            break;
-        default:
-            break;
-        }
-        super.showProgress(type);
-    }
-
-    //TODO: SET BREAKPOINT HERE, THIS IS CALLED TOO MANY TIMES
-    @Override
-    public void hideProgress(PROGRESS_TYPE type) {
-        switch(type) {
-        case ACTION:
-            if (reloadStart) {
-                reloadStart = false;
-                getActionBar().setDisplayShowHomeEnabled(true);
-                getActionBar().setDisplayShowCustomEnabled(false);
-                actionBarProgressBar.setIndeterminate(false);
-                invalidateOptionsMenu();
-                actionBarProgressText.setText(R.string.action_bar_swipe);
-                postListView.enableOnTouch();
-            }
-            break;
-        case INLINE:
-            if (footerProgress != null) {
-                footerProgress.setVisibility(View.GONE);
-                footerButton.setVisibility(View.VISIBLE);
-            }
-            break;
-        default:
-            break;
-        }
-        super.hideProgress(type);
-    }
-
-    protected void loadMorePosts() {
-        TaskPostLoadBase task = getLoadPostTask();
-        task.setAfterId(getLastId());
-
-        (new TaskManager(this))
-        .addTask(task)
-        .setProgress(PROGRESS_TYPE.INLINE)
-        .run();
     }
 
     private void refreshPosts() {
+        postListView.disableOverscroll();
         (new TaskManager(this))
         .addTask(new TaskGetLocation())
         .addTask((new TaskGetTopics()).setCallback(new TaskListener() {
@@ -538,7 +449,82 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         }))
         .addTask(getLoadPostTask())
         .setProgress(PROGRESS_TYPE.ACTION)
+        .setCallback(new TaskListener() {
+            @Override
+            public void postExecute(TaskManager tm, ResponseObj response) {
+                updatePostsList(parsePosts(response), false, true);
+                postListView.enableOverscroll();
+            }
+        })
         .run();
+    }
+
+    protected void loadMorePosts() {
+        isLoadingMore = true;
+        (new TaskManager(this))
+        .addTask(getLoadPostTask().setAfterId(getLastId()))
+        .setProgress(PROGRESS_TYPE.INLINE)
+        .setCallback(new TaskListener() {
+            @Override
+            public void postExecute(TaskManager tm, ResponseObj response) {
+                updatePostsList(parsePosts(response), true, true);
+                isLoadingMore = false;
+            }
+        })
+        .run();
+    }
+
+    @Override
+    public void showProgress(PROGRESS_TYPE type) {
+        switch(type) {
+        case INLINE:
+            if (footerProgress != null) {
+                footerProgress.setVisibility(View.VISIBLE);
+            }
+            if (footerButton != null) {
+                footerButton.setVisibility(View.GONE);
+            }
+            break;
+        default:
+            break;
+        }
+        super.showProgress(type);
+    }
+
+    @Override
+    public void hideProgress(PROGRESS_TYPE type) {
+        switch(type) {
+        case ACTION:
+            if (isShowingActionProgress) {
+                postListView.enableOnTouch();
+            }
+            break;
+        case INLINE:
+            if (footerProgress != null) {
+                footerProgress.setVisibility(View.GONE);
+            }
+            if (footerButton != null) {
+                footerButton.setVisibility(View.VISIBLE);
+            }
+            break;
+        default:
+            break;
+        }
+        super.hideProgress(type);
+    }
+
+    @Override
+    public void setProgressText(String text) {
+        if (footerText != null) {
+            footerText.setText(text);
+        }
+        super.setProgressText(text);
+    }
+
+    private ArrayList<PostObj> parsePosts(ResponseObj response) {
+        if (response == null) return new ArrayList<PostObj>();
+        ArrayList<PostObj> posts = (new Gson()).fromJson(response.data.get("posts"), new TypeToken<List<PostObj>>(){}.getType());
+        return (posts == null) ? new ArrayList<PostObj>() : posts;
     }
 
     protected TaskPostLoadBase getLoadPostTask() {

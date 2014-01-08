@@ -15,6 +15,7 @@ public class ListById extends BaseDrawerListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        footerButton = null;
     }
 
     @Override
@@ -37,7 +38,6 @@ public class ListById extends BaseDrawerListActivity {
         return POST_LIST_TYPE.STAR;
     }
 
-    //TODO: HIDE LOAD MORE BUTTON FROM BEGINNING
     @Override
     protected TaskPostLoadBase getLoadPostTask() {
         return new TaskPostLoadById(StringUtils.join(pref.getStarred(), ","));

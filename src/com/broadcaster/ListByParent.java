@@ -32,6 +32,7 @@ public class ListByParent extends BaseDrawerListActivity {
     private RelativeLayout replyBox;
     private Button replySubmit;
     private PostObj mPost;
+    private PostViewHolder headerViewHolder;
 
     protected ShareActionProvider mShareActionProvider;
 
@@ -134,7 +135,6 @@ public class ListByParent extends BaseDrawerListActivity {
     }
 
     @Override
-    // TODO: SEACH FOR ALL 4 SHOW/HIDE PROGRESS METHODS AND REVIEW CODE
     public void showProgress(PROGRESS_TYPE type) {
         switch(type) {
         case INLINE:

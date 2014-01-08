@@ -2,7 +2,6 @@ package com.broadcaster;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Queue;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -14,10 +13,8 @@ import com.broadcaster.model.AttachObj;
 import com.broadcaster.model.AttachObj.AttachmentInteractListener;
 import com.broadcaster.model.PostObj;
 import com.broadcaster.task.TaskBase;
-import com.broadcaster.task.TaskManager;
 import com.broadcaster.task.TaskPostUpdate;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
-import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.Util;
 
 public class PostEdit extends PostNew {
@@ -26,36 +23,36 @@ public class PostEdit extends PostNew {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        PostObj post = (PostObj)getIntent().getExtras().getSerializable("postObj");
-        gallery.setTag(post);
+        mPost = (PostObj)getIntent().getExtras().getSerializable("postObj");
+        gallery.setTag(mPost);
 
-        if(post.tags != null) {
+        if(mPost.tags != null) {
             for (int i=0; i<postTagItems.size(); i++) {
-                if (postTagItems.get(i).equals(post.tags)) {
+                if (postTagItems.get(i).equals(mPost.tags)) {
                     postTag.setSelection(i);
                 }
             }
-            postTitle.setText(post.getTitle());
-            postText.setText(post.getText());
+            postTitle.setText(mPost.getTitle());
+            postText.setText(mPost.getText());
         }
         else {
             postTag.setVisibility(View.GONE);
-            postTitle.setText(post.getTitle());
+            postTitle.setText(mPost.getTitle());
             postText.setVisibility(View.GONE);
         }
 
-        for (int i = 0; i < post.getAttachments().size(); i++) {
-            AttachObj attach = post.getAttachments().get(i);
+        for (int i = 0; i < mPost.getAttachments().size(); i++) {
+            AttachObj attach = mPost.getAttachments().get(i);
             try {
                 switch(attach.type) {
                 case IMAGE:
-                    insertImage(post, attach);
+                    insertImage(mPost, attach);
                     break;
                 case AUDIO:
-                    insertAudio(post, attach);
+                    insertAudio(mPost, attach);
                     break;
                 case VIDEO:
-                    insertVideo(post, attach);
+                    insertVideo(mPost, attach);
                     break;
                 case DELETE:
                     break;
@@ -65,7 +62,7 @@ public class PostEdit extends PostNew {
             }
         }
         
-        postId.setText(post.id.toString());
+        postId.setText(mPost.id.toString());
     }
 
     @Override
@@ -75,13 +72,8 @@ public class PostEdit extends PostNew {
     }
 
     @Override
-    protected void submitPost(Queue<TaskBase> attachmentTasks) {
-        TaskManager tm = new TaskManager(PostEdit.this);
-        tm.addTask(new TaskPostUpdate(constructNewPost()))
-        .addTask(attachmentTasks)
-        .setProgress(PROGRESS_TYPE.OVERLAY)
-        .setCallback(getSubmitCallback())
-        .run();
+    protected TaskBase getPostTask() {
+        return new TaskPostUpdate(mPost);
     }
 
     @Override

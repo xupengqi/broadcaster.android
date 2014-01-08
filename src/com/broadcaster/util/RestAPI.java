@@ -230,9 +230,9 @@ public class RestAPI {
     //        return params;
     //    }
 
-    public List<NameValuePair> getNewThumbParams(UserObj user, String postId, String attachId) {
+    public List<NameValuePair> getNewThumbParams(UserObj user, Integer postId, String attachId) {
         List<NameValuePair> params = getAuthParams(user);
-        params.add(new BasicNameValuePair("postId", postId));
+        params.add(new BasicNameValuePair("postId", postId.toString()));
         params.add(new BasicNameValuePair("attachId", attachId));
         return params;
     }
@@ -243,9 +243,9 @@ public class RestAPI {
     //        return params;
     //    }
 
-    public List<NameValuePair> getAttachmentParams(UserObj user, AttachObj attachment, String postId) {
+    public List<NameValuePair> getAttachmentParams(UserObj user, AttachObj attachment, Integer postId) {
         List<NameValuePair> params = getAuthParams(user);
-        params.add(new BasicNameValuePair("data[postId]", postId));
+        params.add(new BasicNameValuePair("data[postId]", postId.toString()));
         if (attachment.type == MEDIA_TYPE.DELETE) {
             params.add(new BasicNameValuePair("data[content][attachments][0][id]", attachment.id));
         }
@@ -367,7 +367,7 @@ public class RestAPI {
         }
         catch (Exception e) {
             Util.debug("lastResponse", lastResponse);
-            e.printStackTrace(); //TODO: SHOW ERROR HERE AND STOP REST OF THE OPERATIONS
+            e.printStackTrace();
         }
         finally {
             hc.close();

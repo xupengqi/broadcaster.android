@@ -49,11 +49,6 @@
         android:layout_height="wrap_content"
         android:text="@string/button_register" />
 
-    <include
-        android:id="@+id/login_progress"
-        layout="@layout/module_list_footer"
-        android:visibility="gone" />
-
     <ListView
         android:id="@+id/login_accounts"
         android:layout_width="wrap_content"

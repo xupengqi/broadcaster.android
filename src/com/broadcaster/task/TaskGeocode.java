@@ -47,7 +47,6 @@ public class TaskGeocode extends TaskBase {
         super.onPostExecute(tm);
     }
 
-    //TODO: REMOVE TM.RESULTS AND UPDATE OTHERS TO USE CUSTOMIZED CALLBACK METHODS
     public TaskBase setCallback(TaskGeocodeListener listener) {
         mGeocodeListener = listener;
         return this;

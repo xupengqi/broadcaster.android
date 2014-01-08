@@ -9,16 +9,18 @@ import org.apache.http.NameValuePair;
 import com.broadcaster.BaseActivity;
 import com.broadcaster.PostNew;
 import com.broadcaster.model.AttachObj;
+import com.broadcaster.model.PostObj;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
-import com.broadcaster.util.Constants.TASK_RESULT;
 import com.broadcaster.util.ImageUtil;
 import com.broadcaster.util.Util;
 
 public class TaskAttachmentNew extends TaskBase {
     private AttachObj mAttach;
+    private PostObj mPost;
     private PostNew mActivity;
 
-    public TaskAttachmentNew(PostNew activity, AttachObj attachment) {
+    public TaskAttachmentNew(PostNew activity, PostObj post, AttachObj attachment) {
+        mPost = post;
         mAttach = attachment;
         mActivity = activity;
         setProgressText("Uploading attachment...");
@@ -41,14 +43,13 @@ public class TaskAttachmentNew extends TaskBase {
             }
         }
 
-        String postId = tm.getResult(TASK_RESULT.POSTID).toString();
-        List<NameValuePair> params = BaseActivity.api.getAttachmentParams(BaseActivity.pref.getUser(), mAttach, postId);
+        List<NameValuePair> params = BaseActivity.api.getAttachmentParams(BaseActivity.pref.getUser(), mAttach, mPost.id);
         mResponse = BaseActivity.api.newAttachment(params, file, mAttach.type);
 
         if (mAttach.type == MEDIA_TYPE.VIDEO) {
             try {
                 File thumb = ImageUtil.optimizeImage(tm.getActivity(), ImageUtil.createVideoThumb(mAttach.fileName), 75);
-                BaseActivity.api.newThumb(BaseActivity.api.getNewThumbParams(BaseActivity.pref.getUser(), postId, mResponse.data.get("attachId").getAsString()), thumb);
+                BaseActivity.api.newThumb(BaseActivity.api.getNewThumbParams(BaseActivity.pref.getUser(), mPost.id, mResponse.data.get("attachId").getAsString()), thumb);
             } catch (IOException e) {
                 Util.logError(tm.getActivity(), e);
             }

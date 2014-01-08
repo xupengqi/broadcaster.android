@@ -33,7 +33,7 @@ public class AccountRegister extends AccountBase {
                 if (validate()) {
                     (new TaskManager((BaseActivity)getActivity()))
                     .addTask(new TaskAccount().register(username.getText().toString(), email.getText().toString(), password.getText().toString()))
-                    .setProgress(PROGRESS_TYPE.INLINE)
+                    .setProgress(PROGRESS_TYPE.ACTION)
                     .run();
                 }
             }

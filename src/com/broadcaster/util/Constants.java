@@ -23,11 +23,6 @@ public class Constants {
     
     public static enum POST_LIST_TYPE {PREF, TOPIC, USER, STAR, PARENT}
 
-    public static enum TASK_RESULT {
-        RAW_HTTP_RESPONSE,
-        POSTID,
-    };
-
     public static final int REQUEST_MEDIA = 1;
     public static final int REQUEST_PICK_IMAGE = 2;
     public static final int REQUEST_TAKE_IMAGE = 3;

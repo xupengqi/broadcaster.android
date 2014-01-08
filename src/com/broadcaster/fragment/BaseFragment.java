@@ -25,9 +25,4 @@ public abstract class BaseFragment extends Fragment {
         Log.e(source, error);
         Toast.makeText(parent, error, Toast.LENGTH_LONG).show();
     }
-
-    //TODO: MERGE/CHANGE THIS TO SHOWPROGRESS
-    public void startLoadingMode() { }
-
-    public void stopLoadingMode() { }
 }

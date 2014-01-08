@@ -11,8 +11,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 
-import com.broadcaster.fragment.BaseFragment;
-import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.util.PagerAdapterBase;
 
 public class BaseDrawerTabActivity extends BaseDrawerActivity {
@@ -69,44 +67,6 @@ public class BaseDrawerTabActivity extends BaseDrawerActivity {
 
     public void onPageSelected(int position) {
         getActionBar().setSelectedNavigationItem(position);
-    }
-    @Override
-    public void showProgress(PROGRESS_TYPE type) {
-        switch(type) {
-        case ACTION:
-            break;
-        case INLINE:
-            if (currentFragments != null) {
-                //super.startLoadingMode();
-                //getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-                BaseFragment fragment = (BaseFragment) currentFragments.get(mViewPager.getCurrentItem());
-                fragment.startLoadingMode();
-                hideKeyboard();
-            }
-            break;
-        default:
-            break;
-        }
-        super.showProgress(type);
-    }
-
-    @Override
-    public void hideProgress(PROGRESS_TYPE type) {
-        switch(type) {
-        case ACTION:
-            break;
-        case INLINE:
-            if (currentFragments != null) {
-                //super.stopLoadingMode();
-                //getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-                BaseFragment fragment = (BaseFragment) currentFragments.get(mViewPager.getCurrentItem());
-                fragment.stopLoadingMode();
-            }
-            break;
-        default:
-            break;
-        }
-        super.hideProgress(type);
     }
 
     @Override

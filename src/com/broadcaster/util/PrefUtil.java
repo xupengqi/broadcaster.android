@@ -37,7 +37,7 @@ public class PrefUtil {
     private final String KEY_MYTOPICS = "MYTOPICS";
     private final String KEY_ALLTAGS = "ALLTAGS";
     private final String KEY_REAL_LOCATION = "REAL_LOCATION";
-    private final String KEY_LOCATION_VIEWING = "LOCATION_VIEWING";
+    private final String KEY_VIEWING_LOCATION = "VIEWING_LOCATION";
     private final String KEY_LOCATIONS = "LOCATIONS";
     private final String KEY_RADIUS = "RADIUS";
     private final String KEY_ERROR = "ERROR";
@@ -249,18 +249,26 @@ public class PrefUtil {
         editor.commit();
     }
 
-    public void setViewingLocation(int position) {
+    public void setViewingLocation(LocationObj l) {
         Editor editor = sharedPref.edit();
-        editor.putInt(KEY_LOCATION_VIEWING, position);
+        editor.putString(KEY_VIEWING_LOCATION, gson.toJson(l));
         editor.commit();
     }
 
     public LocationObj getViewingLocation() {
-        int position = getViewingLocationPosition();
-        if (position >= 0 && position < getLocations().size()) {
-            return getLocations().get(position);
+        String locStr = sharedPref.getString(KEY_VIEWING_LOCATION, null);
+        if (locStr == null) {
+            return getRealLocation();
         }
-        return getRealLocation();
+        JsonObject locJson = parser.parse(locStr).getAsJsonObject();
+        LocationObj loc = gson.fromJson(locJson, LocationObj.class);
+        return loc;
+    }
+    
+    public void clearViewingLocation() {
+        Editor editor = sharedPref.edit();
+        editor.remove(KEY_VIEWING_LOCATION);
+        editor.commit();
     }
 
     public void addLocation(LocationObj loc) {
@@ -269,14 +277,15 @@ public class PrefUtil {
         setLocations(locations);
     }
 
-    public void removeLocation(int position) {
+    public void removeLocation(LocationObj location) {
         List<LocationObj> locations = getLocations();
-        locations.remove(position);
+        for (int i=0; i<locations.size(); i++) {
+            if (locations.get(i).name.equals(location.name)) {
+                locations.remove(i);
+                break;
+            }
+        }
         setLocations(locations);
-    }
-
-    public Integer getViewingLocationPosition() {
-        return sharedPref.getInt(KEY_LOCATION_VIEWING, -1);
     }
 
     public List<LocationObj> getLocations() {

@@ -48,7 +48,6 @@ import com.broadcaster.task.TaskPostNew;
 import com.broadcaster.util.Constants;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
 import com.broadcaster.util.Constants.PROGRESS_TYPE;
-import com.broadcaster.util.Constants.TASK_RESULT;
 import com.broadcaster.util.ImageUtil;
 import com.broadcaster.util.PathUtil;
 import com.broadcaster.util.Util;
@@ -73,6 +72,7 @@ public class PostNew extends BaseDrawerActivity {
     protected ArrayAdapter<String> postTagAdapter;
     protected List<String> postTagItems;
     protected Integer prevSelectedTopic;
+    protected PostObj mPost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -215,19 +215,25 @@ public class PostNew extends BaseDrawerActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_submit:
+            mPost = constructNewPost();
             Queue<TaskBase> attachmentTasks = new LinkedList<TaskBase>();
             for(AttachObj attachment : attachments) {
                 switch(attachment.type) {
                 case DELETE:
-                    attachmentTasks.add(new TaskAttachmentDel(attachment));
+                    attachmentTasks.add(new TaskAttachmentDel(mPost, attachment));
                     break;
                 default:
-                    attachmentTasks.add(new TaskAttachmentNew(PostNew.this, attachment));
+                    attachmentTasks.add(new TaskAttachmentNew(PostNew.this, mPost, attachment));
                     break;
                 }
             }
 
-            submitPost(attachmentTasks);
+            (new TaskManager(PostNew.this))
+            .addTask(getPostTask())
+            .addTask(attachmentTasks)
+            .setCallback(getSubmitCallback())
+            .setProgress(PROGRESS_TYPE.OVERLAY)
+            .run();
 
             hideKeyboard();
             return true;
@@ -236,13 +242,8 @@ public class PostNew extends BaseDrawerActivity {
         }
     }
 
-    protected void submitPost(Queue<TaskBase> attachmentTasks) {
-        (new TaskManager(PostNew.this))
-        .addTask(new TaskPostNew(constructNewPost()))
-        .addTask(attachmentTasks)
-        .setCallback(getSubmitCallback())
-        .setProgress(PROGRESS_TYPE.OVERLAY)
-        .run();
+    protected TaskBase getPostTask() {
+        return new TaskPostNew(mPost);
     }
 
     protected TaskListener getSubmitCallback() {
@@ -250,7 +251,7 @@ public class PostNew extends BaseDrawerActivity {
             @Override
             public void postExecute(TaskManager tm, ResponseObj response) {
                 Intent intent = new Intent(PostNew.this, ListByParent.class);
-                intent.putExtra("postId", Integer.parseInt(tm.getResult(TASK_RESULT.POSTID).toString()));
+                intent.putExtra("postId", mPost.id);
                 startActivity(intent);
                 finish();
             }

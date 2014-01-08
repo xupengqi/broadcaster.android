@@ -7,6 +7,8 @@ import com.broadcaster.BaseActivity;
 import com.broadcaster.PostNew;
 import com.broadcaster.model.UserObj;
 import com.broadcaster.util.Constants;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.plus.model.people.Person;
 import com.google.gson.Gson;
 
@@ -38,10 +40,10 @@ public class TaskAccount extends TaskBase {
         return this;
     }
     
-    public TaskAccount loginGoogle(Person googlePerson, String token) {
+    public TaskAccount loginGoogle(Person googlePerson, String email) {
         mAction = LOGIN_ACTION.LOGINGOOGLE;
         mGooglePerson = googlePerson;
-        mToken = token;
+        mEmail = email;
         setProgressText("Authenticating with server...");
         return this;
     }
@@ -77,6 +79,14 @@ public class TaskAccount extends TaskBase {
             mResponse = BaseActivity.api.loginFB(BaseActivity.api.getFBLoginParams(mUserId, mUsername, mEmail, mToken));
             break;
         case LOGINGOOGLE:
+            try {
+                mToken = GoogleAuthUtil.getToken(
+                        args[0].getActivity(),
+                        mEmail,
+                        "oauth2:" + Scopes.PLUS_LOGIN);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             mResponse = BaseActivity.api.loginGPlus(BaseActivity.api.getGPlusLoginParams(mGooglePerson.getId(), mGooglePerson.getDisplayName(), "", mToken));
             break;
         case RMFB:

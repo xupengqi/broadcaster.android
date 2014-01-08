@@ -22,9 +22,4 @@
         android:enabled="false"
         android:text="@string/button_pass" />
 
-    <include
-        android:id="@+id/login_progress"
-        layout="@layout/module_list_footer"
-        android:visibility="gone" />
-
 </LinearLayout>

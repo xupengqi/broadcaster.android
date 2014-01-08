@@ -16,11 +16,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AbsListView.LayoutParams;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -31,24 +34,28 @@ import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.broadcaster.view.LocationSettings;
 
 public abstract class BaseDrawerActivity extends BaseActivity {
-    protected DrawerLayout mDrawerLayout;
-    protected ActionBarDrawerToggle mDrawerToggle;
-    protected List<Constants.DRAWER_ITEMS> drawerItems;
-    protected TextView drawerUsername;
-    protected TextView drawerEmail;
-
     public ListView drawerList;
     public ArrayAdapter<Constants.DRAWER_ITEMS> drawerAdapter;
 
-    protected RelativeLayout loading;
-    protected TextView progressText;
-    protected ImageView progressImage;
-    protected Button progressCancel;
-    protected TextView drawerLogin;
-    protected TextView drawerLogout;
+    private RelativeLayout loading;
+    private TextView progressText;
+    private ImageView progressImage;
+    private Button progressCancel;
+    private TextView drawerLogin;
+    private TextView drawerLogout;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private List<Constants.DRAWER_ITEMS> drawerItems;
+    private TextView drawerUsername;
+    private TextView drawerEmail;
 
+    protected boolean mActionBarProgressIndeterminate = true;
     private LocationSettings drawerLocations;
     private String mTitle;
+
+
+    protected ProgressBar actionBarProgressBar;
+    private TextView actionBarProgressText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -209,8 +216,6 @@ public abstract class BaseDrawerActivity extends BaseActivity {
         }
     }
 
-    protected void refreshPostsFromButton() {}
-
     /**
      * When using the ActionBarDrawerToggle, you must call it during
      * onPostCreate() and onConfigurationChanged()...
@@ -229,7 +234,6 @@ public abstract class BaseDrawerActivity extends BaseActivity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    //TODO: REVIEW THIS, FIDN A BETTER WAY
     protected void initProgressElements() {
         loading = (RelativeLayout) findViewById(R.id.loading);
         progressText = (TextView) findViewById(R.id.progressText);
@@ -321,6 +325,21 @@ public abstract class BaseDrawerActivity extends BaseActivity {
     @Override
     public void showProgress(PROGRESS_TYPE type) {
         switch(type) {
+        case ACTION:
+            if (!isShowingActionProgress) {
+                isShowingActionProgress = true;
+                //getActionBar().setDisplayShowHomeEnabled(true);
+                getActionBar().setDisplayShowCustomEnabled(true);
+                getActionBar().setCustomView(R.layout.module_cab);
+                View homeIcon = findViewById(android.R.id.home);
+                ((View) homeIcon.getParent()).setVisibility(View.GONE);
+                invalidateOptionsMenu(); // this will call onPrepareOptionsMenu()
+                actionBarProgressText = (TextView) getActionBar().getCustomView().findViewById(R.id.action_bar_text);
+            }
+            actionBarProgressBar = (ProgressBar) getActionBar().getCustomView().findViewById(R.id.action_bar_progress);
+            actionBarProgressBar.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+            actionBarProgressBar.setIndeterminate(mActionBarProgressIndeterminate);
+            break;
         case OVERLAY:
             if (loading != null) {
                 loading.setVisibility(View.VISIBLE);
@@ -334,6 +353,18 @@ public abstract class BaseDrawerActivity extends BaseActivity {
     @Override
     public void hideProgress(PROGRESS_TYPE type) {
         switch(type) {
+        case ACTION:
+            if (isShowingActionProgress) {
+                isShowingActionProgress = false;
+                //getActionBar().setDisplayShowHomeEnabled(true);
+                View homeIcon = findViewById(android.R.id.home);
+                ((View) homeIcon.getParent()).setVisibility(View.VISIBLE);
+                getActionBar().setDisplayShowCustomEnabled(false);
+                actionBarProgressBar.setIndeterminate(false);
+                invalidateOptionsMenu();
+                actionBarProgressText.setText(R.string.action_bar_swipe);
+            }
+            break;
         case OVERLAY:
             if (loading != null) {
                 loading.setVisibility(View.GONE);
@@ -349,6 +380,9 @@ public abstract class BaseDrawerActivity extends BaseActivity {
         if (progressText != null) {
             progressText.setText(text);
         }
+        if (actionBarProgressText != null) {
+            actionBarProgressText.setText(text);
+        }
     }
 
     @Override
@@ -361,7 +395,6 @@ public abstract class BaseDrawerActivity extends BaseActivity {
             else {
                 progressImage.setVisibility(View.GONE);
             }
-
         }
     }
 }

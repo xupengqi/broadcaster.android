@@ -21,10 +21,42 @@ import com.broadcaster.util.TagsListAdapter;
 
 public class Topics extends BaseDrawerActivity {
     protected Fragment fragment;
+    
+    private View topicsHeader;
+    private CheckBox headerTag;
+    private ListView tagsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        LayoutInflater mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        topicsHeader = mInflater.inflate(R.layout.item_topics_tag, null);
+        
+        tagsList = (ListView) findViewById(R.id.tags_list);
+        tagsList.addHeaderView(topicsHeader);
+        
+        headerTag = (CheckBox) topicsHeader.findViewById(R.id.tag_text);
+        headerTag.setText("Everything");
+        headerTag.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+                pref.setUseEverything(arg1);
+                if (arg1) {
+                    headerTag.setTextColor(0xFF000000);
+                }
+                else {
+                    headerTag.setTextColor(0xFFCCCCCC);
+                }
+                tagsList.invalidateViews();
+            }
+        });
+        if (pref.getUseEverything()) {
+            headerTag.setChecked(true);
+        }
+        else {
+            headerTag.setTextColor(0xFFCCCCCC);
+        }
 
         initProgressElements();
         refreshTopics();
@@ -67,32 +99,6 @@ public class Topics extends BaseDrawerActivity {
     }
 
     protected void renderTags() {
-        LayoutInflater mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final ListView tagsList = (ListView) findViewById(R.id.tags_list);
-        View topicsHeader = mInflater.inflate(R.layout.item_topics_tag, null);
-        final CheckBox headerTag = (CheckBox) topicsHeader.findViewById(R.id.tag_text);
-        headerTag.setText("Everything");
-        tagsList.addHeaderView(topicsHeader);
-        headerTag.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-                pref.setUseEverything(arg1);
-                if (arg1) {
-                    headerTag.setTextColor(0xFF000000);
-                }
-                else {
-                    headerTag.setTextColor(0xFFCCCCCC);
-                }
-                tagsList.invalidateViews();
-            }
-        });
-        if (pref.getUseEverything()) {
-            headerTag.setChecked(true);
-        }
-        else {
-            headerTag.setTextColor(0xFFCCCCCC);
-        }
-
         TagsListAdapter arrayAdapter = new TagsListAdapter(this, tagsList, headerTag, pref.getAllTags().split(","));
         tagsList.setAdapter(arrayAdapter);
     }

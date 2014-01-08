@@ -6,7 +6,6 @@ import org.apache.http.NameValuePair;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.model.PostObj;
-import com.broadcaster.util.Constants.TASK_RESULT;
 
 public class TaskPostUpdate extends TaskBase {
     private PostObj mPo;
@@ -22,13 +21,5 @@ public class TaskPostUpdate extends TaskBase {
         mResponse = BaseActivity.api.updatePost(params);
 
         return super.doInBackground(args);
-    }
-
-    @Override
-    protected void onPostExecute(TaskManager tm) {
-        if (!mResponse.hasError()) {
-            tm.putResult(TASK_RESULT.POSTID, mResponse.data.get("postId").getAsInt());
-        }
-        super.onPostExecute(tm);
     }
 }

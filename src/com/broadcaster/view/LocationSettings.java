@@ -108,7 +108,7 @@ public class LocationSettings extends LinearLayout {
         currentLocationSelect.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                setViewingLocation(-1, currentLocationSelect);
+                setViewingLocation(null, currentLocationSelect);
             }
         });
         addLocationText.setOnEditorActionListener(new OnEditorActionListener() {
@@ -124,7 +124,6 @@ public class LocationSettings extends LinearLayout {
         currentLocationRefresh.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                //TODO: SHOW ACTIONBAR PROGRESS
                 BaseActivity.pref.clearRealLocation();
                 getLocation();
             }
@@ -173,7 +172,14 @@ public class LocationSettings extends LinearLayout {
         }
 
         activity.registerForContextMenu(addLocationText);
-        getLocation();
+
+        LocationObj loc = BaseActivity.pref.getRealLocation();
+        if (loc == null) {
+            getLocation();
+        }
+        else {
+            currentLocationSelect.setText(loc.name);
+        }
     }
 
     protected void getLocation() {
@@ -185,12 +191,12 @@ public class LocationSettings extends LinearLayout {
                 currentLocationSelect.setText(loc.name);
             }
         }))
-        .setProgress(PROGRESS_TYPE.INLINE)
+        .setProgress(PROGRESS_TYPE.ACTION)
         .run();
     }
 
     private void checkCurrentLocation() {
-        if (BaseActivity.pref.getViewingLocationPosition() < 0) {
+        if (BaseActivity.pref.getViewingLocation().name.equals(currentLocationSelect.getText().toString())) {
             currentLocationSelect.setChecked(true);
             selectedLocation = currentLocationSelect;
         }
@@ -200,13 +206,18 @@ public class LocationSettings extends LinearLayout {
         checkCurrentLocation();
         savedLocationsGroup.removeAllViews();
         savedLocations = BaseActivity.pref.getLocations();
-        for (int i=0; i<savedLocations.size(); i++) {
-            renderSavedLocation(i);
+        for (LocationObj location : savedLocations) {
+            renderSavedLocation(location);
         }
     }
 
-    private void setViewingLocation(int i, RadioButton button) {
-        BaseActivity.pref.setViewingLocation(i);
+    private void setViewingLocation(LocationObj location, RadioButton button) {
+        if (location == null) {
+            BaseActivity.pref.clearViewingLocation();
+        }
+        else {
+            BaseActivity.pref.setViewingLocation(location);
+        }
         if (selectedLocation != null) {
             selectedLocation.setChecked(false);
         }
@@ -216,7 +227,6 @@ public class LocationSettings extends LinearLayout {
     private void getAddress() {
         String address = addLocationText.getText().toString();
         if (address.length() > 2) {
-            //TODO: SHOW ACTION BAR PROGRESS
             locations = null;
             addresses = null;
             (new TaskManager(activity))
@@ -250,7 +260,7 @@ public class LocationSettings extends LinearLayout {
                     }
                 }
             }))
-            .setProgress(PROGRESS_TYPE.INLINE)
+            .setProgress(PROGRESS_TYPE.ACTION)
             .run();
         }
     }
@@ -260,20 +270,19 @@ public class LocationSettings extends LinearLayout {
         LocationObj newLoc = new LocationObj(addressLine, latitude, longitude);
         savedLocations.add(newLoc);
         BaseActivity.pref.addLocation(newLoc);
-        renderSavedLocation(savedLocations.size()-1);
+        renderSavedLocation(newLoc);
         activity.hideKeyboard();
         addLocationText.setText("");
     }
 
-    private void renderSavedLocation(final int i) {
+    private void renderSavedLocation(final LocationObj location) {
         LayoutInflater vi = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View locationItemView = vi.inflate(R.layout.item_location, null);
         final RadioButton text = (RadioButton)locationItemView.findViewById(R.id.settings_location_custom_text);
         final Button delete = (Button)locationItemView.findViewById(R.id.settings_location_custom_remove);
-        LocationObj location = savedLocations.get(i);
         text.setText(location.name);
 
-        if (BaseActivity.pref.getViewingLocationPosition().equals(i)) {
+        if (BaseActivity.pref.getViewingLocation().name.equals(location.name)) {
             text.setChecked(true);
             selectedLocation = text;
         }
@@ -285,21 +294,17 @@ public class LocationSettings extends LinearLayout {
         text.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                setViewingLocation(i, text);
+                setViewingLocation(location, text);
             }
         });
         delete.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                BaseActivity.pref.removeLocation(i);
+                BaseActivity.pref.removeLocation(location);
                 savedLocationsGroup.removeView(locationItemView);
-                int viewingLocationPosition = BaseActivity.pref.getViewingLocationPosition();
-                if (viewingLocationPosition > i) {
-                    BaseActivity.pref.setViewingLocation(viewingLocationPosition-1);
-                }
-                if (viewingLocationPosition == i) {
+                if (BaseActivity.pref.getViewingLocation().name.equals(location.name)) {
                     currentLocationSelect.setChecked(true);
-                    setViewingLocation(-1, currentLocationSelect);
+                    setViewingLocation(location, currentLocationSelect);
                 }
             }
         });
