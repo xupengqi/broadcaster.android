@@ -3,82 +3,58 @@ package com.broadcaster.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.broadcaster.util.Constants.ERROR_TYPE;
+import com.broadcaster.util.Constants.ERROR_CODE;
 import com.google.gson.JsonObject;
 
 public class ResponseObj {
     public List<ResponseError> errors = new ArrayList<ResponseError>();;
     public JsonObject data = new JsonObject();
-    
+
     public ResponseObj() {}
-    
-    public ResponseObj(ERROR_TYPE error) {
-        errors.add(ResponseError.createError(error));
+
+    public ResponseObj(ResponseError error) {
+        errors.add(error);
     }
 
     public boolean hasError() {
         return (errors.size() > 0);
     }
 
-    //TODO: CHANGE THIS INTO SOMETHING ELSE
-//    public String getReadableError(TASK t) {
-//        String errorCode = getErrorCode();
-//        switch(t) {
-//        case UPDATE_USERNAME:
-//            try {
-//                int sqlError = Integer.parseInt(errorCode);
-//                if (sqlError == Constants.SQL_ERROR_DUPLICATE) {
-//                    return "Username already exist.";
-//                }
-//            }
-//            catch (Exception e) {
-//                return getError();
-//            }
-//        case REGISTER:
-//            if (errorCode.equals("MISSING_PARAMETER")) {
-//                if (errors.get(0).custom_msg.equals("pass")) {
-//                    return "Please enter a password.";
-//                }
-//            }
-//        default:
-//            return getError();
-//        }
-//    }
-
     public String getError() {
-        return errors.get(0).toString();
+        switch(errors.get(0).code) {
+        case NO_CONNECTION:
+            return "Connection error.";
+        case USERNAME_EXISTS:
+            return "Username already exist.";
+        case AUTHENTICATION_FAILED:
+            return "Invalid username or password.";
+        case REQUIRE_LOGIN:
+            return "Please login.";
+        case INTERNAL_ERROR:
+            return "Internal Error.";
+        default:
+            return "UNKNOWN ERROR";
+        }
     }
 
-    public String getErrorCode() {
+    public ERROR_CODE getErrorCode() {
         if (!hasError()) {
-            return "";
+            return null;
         }
         return errors.get(0).code;
     }
 
     public static class ResponseError {
-        public Integer id;
-        public String code;
-        public String msg;
-        public String custom_msg;
-        
+        public ERROR_CODE code;
+
         public ResponseError() { }
-        
-        //TODO: REFACTOR RESPONSE ERROR, {NAME,MESSAGE}
-        public ResponseError(Integer id, String code, String msg, String custom_msg) {
-            this.id = id;
+
+        public ResponseError(ERROR_CODE code) {
             this.code = code;
-            this.msg = msg;
-            this.custom_msg = custom_msg;
         }
 
-        @Override
-        public String toString() {
-            return msg+" "+custom_msg;
-        }
-        
-        public static ResponseError createError(ERROR_TYPE type) {
-            return new ResponseError(0, "NO_INTERNET", "NO INTERNET CONNECTION", "");
+        public static ResponseError createNoConnectionError() {
+            return new ResponseError(ERROR_CODE.NO_CONNECTION);
         }
     }
 }

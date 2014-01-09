@@ -29,8 +29,8 @@ import com.broadcaster.model.GeocodeResponse;
 import com.broadcaster.model.LocationObj;
 import com.broadcaster.model.PostObj;
 import com.broadcaster.model.ResponseObj;
+import com.broadcaster.model.ResponseObj.ResponseError;
 import com.broadcaster.model.UserObj;
-import com.broadcaster.util.Constants.ERROR_TYPE;
 import com.broadcaster.util.Constants.MEDIA_TYPE;
 import com.google.gson.Gson;
 
@@ -338,7 +338,7 @@ public class RestAPI {
         ResponseObj response = null;
         
         if (!Util.isNetworkAvailable(context)) {
-            response = new ResponseObj(ERROR_TYPE.NO_CONN);
+            response = new ResponseObj(ResponseError.createNoConnectionError());
             return response;
         }
         
@@ -366,6 +366,7 @@ public class RestAPI {
             response = gson.fromJson(lastResponse, ResponseObj.class);
         }
         catch (Exception e) {
+            response = new ResponseObj(ResponseError.createNoConnectionError());
             Util.debug("lastResponse", lastResponse);
             e.printStackTrace();
         }
@@ -388,7 +389,7 @@ public class RestAPI {
         ResponseObj response = null;
         
         if (!Util.isNetworkAvailable(context)) {
-            response = new ResponseObj(ERROR_TYPE.NO_CONN);
+            response = new ResponseObj(ResponseError.createNoConnectionError());
             return response;
         }
         
@@ -417,6 +418,7 @@ public class RestAPI {
             response = gson.fromJson(lastResponse, ResponseObj.class);
         }
         catch (Exception e) {
+            response = new ResponseObj(ResponseError.createNoConnectionError());
             Util.logError(context, e);
             Log.i("lastResponse", lastResponse);
         }

@@ -170,7 +170,6 @@ public class Settings extends BaseDrawerActivity {
                 .addTask((new TaskUpdateAccount()).updateEmail(email.getText().toString()).setCallback(new TaskListener() {
                     @Override
                     public void postExecute(TaskManager tm, ResponseObj response) {
-                        //TODO: CHANGE EMAIL, USERNAME, PASSWORD PROGRESS INTO PROGRESS FUNCTIONS CALLED BY TM
                         emailUpdate.setVisibility(View.VISIBLE);
                         emailProgress.setVisibility(View.GONE);
                         if(!response.hasError()) {
@@ -181,7 +180,6 @@ public class Settings extends BaseDrawerActivity {
                         }
                     }
                 }))
-                .setProgress(PROGRESS_TYPE.INLINE)
                 .run();
             }
         });
@@ -201,7 +199,6 @@ public class Settings extends BaseDrawerActivity {
                         }
                     }
                 }))
-                .setProgress(PROGRESS_TYPE.INLINE)
                 .run();
             }
         });
