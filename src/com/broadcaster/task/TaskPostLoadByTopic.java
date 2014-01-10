@@ -2,6 +2,8 @@ package com.broadcaster.task;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.model.LocationObj;
+import com.broadcaster.model.ResponseObj;
+import com.broadcaster.model.ResponseObj.ResponseError;
 
 public class TaskPostLoadByTopic extends TaskPostLoadBase {
     private LocationObj mLocation;
@@ -17,11 +19,16 @@ public class TaskPostLoadByTopic extends TaskPostLoadBase {
 
     @Override
     protected TaskManager doInBackground(TaskManager... args) {
-        if (mAfterId != null) {
-            mResponse = BaseActivity.api.getPostsByLocation(BaseActivity.api.getAfterParams(BaseActivity.api.getPostsByLocationParams(mLocation, mRadius, mTags), mAfterId));
+        if (mLocation == null) {
+            mResponse = new ResponseObj(ResponseError.createNoLocationError());
         }
         else {
-            mResponse = BaseActivity.api.getPostsByLocation(BaseActivity.api.getPostsByLocationParams(mLocation, mRadius, mTags));
+            if (mAfterId != null) {
+                mResponse = BaseActivity.api.getPostsByLocation(BaseActivity.api.getAfterParams(BaseActivity.api.getPostsByLocationParams(mLocation, mRadius, mTags), mAfterId));
+            }
+            else {
+                mResponse = BaseActivity.api.getPostsByLocation(BaseActivity.api.getPostsByLocationParams(mLocation, mRadius, mTags));
+            }
         }
 
         return super.doInBackground(args);

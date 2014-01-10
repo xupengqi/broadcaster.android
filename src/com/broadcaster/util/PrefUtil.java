@@ -209,14 +209,8 @@ public class PrefUtil {
     }
 
     public String getAllTags() {
-        return sharedPref.getString(KEY_ALLTAGS, null);
+        return sharedPref.getString(KEY_ALLTAGS, "");
     }
-
-//    public void clearAllTags() {
-//        Editor editor = sharedPref.edit();
-//        editor.remove(KEY_ALLTAGS);
-//        editor.commit();
-//    }
 
     public void setRealLocation(LocationObj l) {
         Editor editor = sharedPref.edit();
@@ -233,13 +227,6 @@ public class PrefUtil {
         JsonObject locJson = parser.parse(locStr).getAsJsonObject();
         LocationObj loc = gson.fromJson(locJson, LocationObj.class);
 
-        //        Long timeNow = (new Date()).getTime();
-        //        if (loc.exp <= timeNow) {
-        //            Util.debug("location expired "+((timeNow-loc.exp)/1000)+" seconds ago: "+loc.name);
-        //            return null;
-        //        }
-
-        //        Util.debug("location will expire in "+((loc.exp-timeNow)/1000)+" seconds: "+loc.name);
         return loc;
     }
 
@@ -264,7 +251,7 @@ public class PrefUtil {
         LocationObj loc = gson.fromJson(locJson, LocationObj.class);
         return loc;
     }
-    
+
     public void clearViewingLocation() {
         Editor editor = sharedPref.edit();
         editor.remove(KEY_VIEWING_LOCATION);

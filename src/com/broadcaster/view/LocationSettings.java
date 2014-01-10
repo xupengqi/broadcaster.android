@@ -188,7 +188,9 @@ public class LocationSettings extends LinearLayout {
             @Override
             public void postExecute(TaskManager tm, ResponseObj response) {
                 LocationObj loc = BaseActivity.pref.getRealLocation();
-                currentLocationSelect.setText(loc.name);
+                if (loc != null) {
+                    currentLocationSelect.setText(loc.name);
+                }
             }
         }))
         .setProgress(PROGRESS_TYPE.ACTION)
@@ -196,7 +198,8 @@ public class LocationSettings extends LinearLayout {
     }
 
     private void checkCurrentLocation() {
-        if (BaseActivity.pref.getViewingLocation().name.equals(currentLocationSelect.getText().toString())) {
+        LocationObj viewingLocation = BaseActivity.pref.getViewingLocation();
+        if (viewingLocation != null && viewingLocation.name != null && viewingLocation.name.equals(currentLocationSelect.getText().toString())) {
             currentLocationSelect.setChecked(true);
             selectedLocation = currentLocationSelect;
         }

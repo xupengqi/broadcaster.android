@@ -32,6 +32,8 @@ public class ResponseObj {
             return "Please login.";
         case INTERNAL_ERROR:
             return "Internal Error.";
+        case NO_LOCATION:
+            return "Unable to get your current location.";
         default:
             return "UNKNOWN ERROR";
         }
@@ -55,6 +57,10 @@ public class ResponseObj {
 
         public static ResponseError createNoConnectionError() {
             return new ResponseError(ERROR_CODE.NO_CONNECTION);
+        }
+        
+        public static ResponseError createNoLocationError() {
+            return new ResponseError(ERROR_CODE.NO_LOCATION);
         }
     }
 }
