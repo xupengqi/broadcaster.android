@@ -4,9 +4,9 @@ public class Constants {
     public static final String APP_NAME = "Broadcaster";
     public static final int POST_PAGE_SIZE = 10;
 
-    public static final String authority = "24.6.160.109"; // home
+//    public static final String authority = "24.6.160.109"; // home
     //public static final String authority = "54.225.66.76"; // amzn
-//    public static final String authority = "thebroadcaster.me"; // amzn
+    public static final String authority = "thebroadcaster.me"; // amzn
     //public static final String appRoot = "p1/";
     public static final String appRoot = "";
     public static final String host = "http://"+authority+"/"+appRoot;
@@ -18,8 +18,6 @@ public class Constants {
     public static enum PROGRESS_TYPE {OVERLAY, ACTION, INLINE};
     
     public static enum ERROR_CODE {NO_CONNECTION, USERNAME_EXISTS, AUTHENTICATION_FAILED, REQUIRE_LOGIN, INTERNAL_ERROR};
-
-    public static enum API_ERRORS {Unknown, RESOURCE_NOT_FOUND, REQUIRE_LOGIN};
     
     public static enum POST_LIST_TYPE {PREF, TOPIC, USER, STAR, PARENT}
 
@@ -34,7 +32,8 @@ public class Constants {
 
     public static final String RETURN_TO = "returnTo";
 
-    public static final String SERVER_TIMEZONE = "America/Los_Angeles"; //"UTC"
+    public static final String SERVER_TIMEZONE = "UTC";
+    //public static final String SERVER_TIMEZONE = "America/Los_Angeles";
 
     public static enum DRAWER_ITEMS {NewPost, Home, MyPosts, Starred, Topics, Settings, Help};
 

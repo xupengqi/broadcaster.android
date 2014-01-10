@@ -21,7 +21,7 @@ import com.broadcaster.task.TaskPostDel;
 import com.broadcaster.task.TaskPostLoadBase;
 import com.broadcaster.task.TaskPostLoadByParent;
 import com.broadcaster.task.TaskPostReply;
-import com.broadcaster.util.Constants;
+import com.broadcaster.util.Constants.ERROR_CODE;
 import com.broadcaster.util.Constants.POST_LIST_TYPE;
 import com.broadcaster.util.Constants.PROGRESS_TYPE;
 import com.google.gson.Gson;
@@ -46,8 +46,23 @@ public class ListByParent extends BaseDrawerListActivity {
             @Override
             public void onClick(View arg0) {
                 if (isLoggedIn()) {
-                    replyAndLoad();
-                    hideKeyboard();
+                    if (isValidReply()) {
+                        hideKeyboard();
+
+                        (new TaskManager(ListByParent.this))
+                        .addTask((new TaskPostReply(constructNewPost())).setCallback(new TaskListener() {
+                            @Override
+                            public void postExecute(TaskManager tm, ResponseObj response) {
+                                if(response.getErrorCode() == ERROR_CODE.REQUIRE_LOGIN) {
+                                    menuLogin();
+                                }
+                                replyText.setText(null);
+                                loadMorePosts();
+                            }
+                        }))
+                        .setProgress(PROGRESS_TYPE.INLINE)
+                        .run();
+                    }
                 }
                 else {
                     menuLogin();
@@ -57,7 +72,14 @@ public class ListByParent extends BaseDrawerListActivity {
 
         initProgressElements();
         postId = getIntent().getIntExtra("postId", 0);
-        //        tag = "post"+postId;
+    }
+
+    protected boolean isValidReply() {
+        if (replyText.getText().length() == 0) {
+            replyText.setError("Please enter some text.");
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -206,7 +228,7 @@ public class ListByParent extends BaseDrawerListActivity {
 
     public void loadHeaderPost(PostObj p) {
         mPost = p;
-        if (mPost.id == null) {
+        if (mPost == null || mPost.id == null) {
             showError(this.toString(), "Post not found.");
             finish();
             return;
@@ -232,30 +254,9 @@ public class ListByParent extends BaseDrawerListActivity {
         return (TaskPostLoadBase) (new TaskPostLoadByParent(postId)).setCallback(new TaskListener() {
             @Override
             public void postExecute(TaskManager tm, ResponseObj response) {
-                if(response.getErrorCode().equals(Constants.API_ERRORS.RESOURCE_NOT_FOUND)) {
-                    finish();
-                }
-                else {
-                    PostObj post = (new Gson()).fromJson(response.data.get("post"), PostObj.class);
-                    loadHeaderPost(post);
-                }
+                PostObj post = (new Gson()).fromJson(response.data.get("post"), PostObj.class);
+                loadHeaderPost(post);
             }
         });
-    }
-
-    protected void replyAndLoad() {
-        (new TaskManager(ListByParent.this))
-        .addTask((new TaskPostReply(constructNewPost())).setCallback(new TaskListener() {
-            @Override
-            public void postExecute(TaskManager tm, ResponseObj response) {
-                if(response.getErrorCode().equals(Constants.API_ERRORS.REQUIRE_LOGIN)) {
-                    menuLogin();
-                }
-                replyText.setText(null);
-            }
-        }))
-        .addTask((new TaskPostLoadByParent(postId)).setAfterId(getLastId()))
-        .setProgress(PROGRESS_TYPE.INLINE)
-        .run();
     }
 }

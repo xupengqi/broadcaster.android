@@ -25,6 +25,7 @@ public class TaskGetLocation extends TaskBase {
         (new LocationUtil()).getLocation(tm.getActivity(), new LocationResult(){
             @Override
             public void gotLocation(Location l) {
+                //TODO: MOVE THIS TO TASK, OFF MAIN THREAD
                 LocationObj loc = new LocationObj(null, l.getLatitude(), l.getLongitude());
                 try {
                     Geocoder gcd = new Geocoder(tm.getActivity(), Locale.getDefault());

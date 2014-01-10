@@ -215,31 +215,41 @@ public class PostNew extends BaseDrawerActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_submit:
-            mPost = constructNewPost();
-            Queue<TaskBase> attachmentTasks = new LinkedList<TaskBase>();
-            for(AttachObj attachment : attachments) {
-                switch(attachment.type) {
-                case DELETE:
-                    attachmentTasks.add(new TaskAttachmentDel(mPost, attachment));
-                    break;
-                default:
-                    attachmentTasks.add(new TaskAttachmentNew(PostNew.this, mPost, attachment));
-                    break;
+            if (isValidPost()) {
+                mPost = constructNewPost();
+                Queue<TaskBase> attachmentTasks = new LinkedList<TaskBase>();
+                for(AttachObj attachment : attachments) {
+                    switch(attachment.type) {
+                    case DELETE:
+                        attachmentTasks.add(new TaskAttachmentDel(mPost, attachment));
+                        break;
+                    default:
+                        attachmentTasks.add(new TaskAttachmentNew(PostNew.this, mPost, attachment));
+                        break;
+                    }
                 }
+
+                (new TaskManager(PostNew.this))
+                .addTask(getPostTask())
+                .addTask(attachmentTasks)
+                .setCallback(getSubmitCallback())
+                .setProgress(PROGRESS_TYPE.OVERLAY)
+                .run();
+                hideKeyboard();
             }
 
-            (new TaskManager(PostNew.this))
-            .addTask(getPostTask())
-            .addTask(attachmentTasks)
-            .setCallback(getSubmitCallback())
-            .setProgress(PROGRESS_TYPE.OVERLAY)
-            .run();
-
-            hideKeyboard();
             return true;
         default:
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    private boolean isValidPost() {
+        if (postTitle.getText().length() == 0) {
+            postTitle.setError("Please enter a title.");
+            return false;
+        }
+        return true;
     }
 
     protected TaskBase getPostTask() {

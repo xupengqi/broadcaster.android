@@ -47,6 +47,11 @@ public class AccountRegister extends AccountBase {
             username.setError("Please enter a username");
             return false;
         }
+        
+        if (password.getText().toString().length() == 0) {
+            password.setError("Please enter a password.");
+            return false;
+        }
 
         if (!password.getText().toString().equals(passwordConfirm.getText().toString())) {
             passwordConfirm.setError("Passwords don't match.");
