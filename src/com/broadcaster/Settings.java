@@ -231,11 +231,11 @@ public class Settings extends BaseDrawerActivity {
             account.setVisibility(View.VISIBLE);
             username.setText(pref.getUser().username);
             email.setText(pref.getUser().email);
-            if (pref.getUser().hasFB()) {
+            if (pref.getUser().usingFb > 0) {
                 removeFB.setVisibility(View.VISIBLE);
                 otherAccounts.setVisibility(View.VISIBLE);
             }
-            if (pref.getUser().hasGPlus()) {
+            if (pref.getUser().usingGp > 0) {
                 removeGPlus.setVisibility(View.VISIBLE);
                 otherAccounts.setVisibility(View.VISIBLE);
             }

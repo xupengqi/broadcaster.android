@@ -12,12 +12,6 @@ public class UserObj implements Serializable {
     public String fbId;
     public String gPlusId;
     public int usernameChange = 0;
-    
-    public boolean hasFB() {
-        return fbId != null && fbId.length() > 0;
-    }
-    
-    public boolean hasGPlus() {
-        return gPlusId != null && gPlusId.length() > 0;
-    }
+    public int usingFb;
+    public int usingGp;
 }

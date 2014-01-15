@@ -68,12 +68,14 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
                 //Util.whatsMyHash(BaseActivity.this);
                 session = s;
                 if (state.isOpened() && !isLoggedIn()) {
+                    showProgress(PROGRESS_TYPE.OVERLAY);
                     Request.newMeRequest(s, new Request.GraphUserCallback() {
                         @Override
                         public void onCompleted(GraphUser user, Response response) {
                             if (user != null) {
                                 (new TaskManager(BaseActivity.this))
                                 .addTask((new TaskAccount()).loginFB(user.getId(), user.getUsername(), user.asMap().get("email").toString(), session.getAccessToken()))
+                                .setProgress(PROGRESS_TYPE.OVERLAY)
                                 .run();
                             }
                         }
@@ -331,6 +333,7 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
             Person me = mPlusClient.getCurrentPerson();
             (new TaskManager(BaseActivity.this))
             .addTask((new TaskAccount()).loginGoogle(me, mPlusClient.getAccountName()))
+            .setProgress(PROGRESS_TYPE.OVERLAY)
             .run();
         }
     }

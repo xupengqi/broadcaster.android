@@ -169,7 +169,9 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     @Override
     public void onStart() {
         super.onStart();
-        loadPosts();
+        if (currentPosts.size() == 0) {
+            loadPosts();
+        }
     }
 
     @Override

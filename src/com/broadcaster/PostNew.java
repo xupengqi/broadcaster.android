@@ -62,6 +62,7 @@ public class PostNew extends BaseDrawerActivity {
     private Button attachVideo;
     private AudioCaptureButton attachAudio;
     private LinearLayout attachGroup;
+    private static final String customTopicText = "[Add New Topic]";
 
     protected EditText postTitle;
     protected EditText postText;
@@ -97,7 +98,7 @@ public class PostNew extends BaseDrawerActivity {
         postTag.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                if (postTagItems.get(arg2).equals("[Custom]")) {
+                if (postTagItems.get(arg2).equals(customTopicText)) {
                     showCustsomTopicDialog();
                 }
                 else {
@@ -153,7 +154,7 @@ public class PostNew extends BaseDrawerActivity {
         .addTask((new TaskGetTopics()).setCallback(new TaskListener() {
             @Override
             public void postExecute(TaskManager tm, ResponseObj response) {
-                refreshTopics("default"); // TODO: WILL THIS REFRESH THE LIST AGAIN? IMPLEMENT REFERSH BUTTON FOR TAG AND LOCATION?
+                refreshTopics("default");
             }
         }))
         .setProgress(PROGRESS_TYPE.OVERLAY)
@@ -165,17 +166,17 @@ public class PostNew extends BaseDrawerActivity {
         prevSelectedTopic = 0;
         String[] topics = pref.getAllTags().split(",");
         HashSet<String> topicSet = new HashSet<String>();
-        for (String topic : topics) {
-            postTagItems.add(topic);
-            topicSet.add(topic);
-        }    
         List<String> myTopics = pref.getMyTopics();
         for (String topic : myTopics) {
+            topicSet.add(topic);
+            postTagItems.add(topic);
+        }    
+        for (String topic : topics) {
             if (!topicSet.contains(topic)) {
                 postTagItems.add(topic);
             }
         }    
-        postTagItems.add("[Custom]");
+        postTagItems.add(customTopicText);
 
         for (int i=0; i<postTagItems.size(); i++) {
             if (postTagItems.get(i).equals(selected)) {

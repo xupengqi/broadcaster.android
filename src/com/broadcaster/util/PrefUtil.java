@@ -131,7 +131,10 @@ public class PrefUtil {
     public void addMyTopics(String topic) {
         List<String> topics = getMyTopics();
         if (!topics.contains(topics)) {
-            topics.add(topic);
+            topics.add(0, topic);
+        }
+        while (topics.size() > 10) {
+            topics.remove(topics.size()-1);
         }
 
         Editor editor = sharedPref.edit();
@@ -156,8 +159,13 @@ public class PrefUtil {
     public UserObj getUser() {
         String userStr = sharedPref.getString(KEY_USER, null);
         if (userStr != null) {
-            JsonObject userJson = parser.parse(userStr).getAsJsonObject();
-            return gson.fromJson(userJson, UserObj.class);
+            try {
+                JsonObject userJson = parser.parse(userStr).getAsJsonObject();
+                return gson.fromJson(userJson, UserObj.class);
+            }
+            catch (Exception e) {
+                return null; // this might happen only if we changed the user model.
+            }
         }
         return null;
     }

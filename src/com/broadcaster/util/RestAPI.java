@@ -268,6 +268,7 @@ public class RestAPI {
         params.add(new BasicNameValuePair("data[username]", username));
         params.add(new BasicNameValuePair("data[email]", email));
         params.add(new BasicNameValuePair("data[token]", token));
+        params.add(new BasicNameValuePair("data[usingFb]", "1"));
         return params;
     }
 
@@ -277,6 +278,7 @@ public class RestAPI {
         params.add(new BasicNameValuePair("data[username]", username));
         params.add(new BasicNameValuePair("data[email]", email));
         params.add(new BasicNameValuePair("data[token]", token));
+        params.add(new BasicNameValuePair("data[usingGp]", "1"));
         return params;
     }
 

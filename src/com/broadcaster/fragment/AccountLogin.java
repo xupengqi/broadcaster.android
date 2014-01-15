@@ -9,9 +9,7 @@ import android.view.ViewGroup;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.R;
-import com.broadcaster.model.ResponseObj;
 import com.broadcaster.task.TaskAccount;
-import com.broadcaster.task.TaskBase.TaskListener;
 import com.broadcaster.task.TaskManager;
 import com.broadcaster.util.Constants.PROGRESS_TYPE;
 
@@ -23,16 +21,16 @@ public class AccountLogin extends AccountBase {
 
         submit.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                submit.setVisibility(View.GONE);
+//                submit.setVisibility(View.GONE);
                 (new TaskManager((BaseActivity)getActivity()))
                 .addTask((new TaskAccount()).login(username.getText().toString(), password.getText().toString()))
-                .setProgress(PROGRESS_TYPE.ACTION)
-                .setCallback(new TaskListener() {
-                    @Override
-                    public void postExecute(TaskManager tm, ResponseObj response) {
-                        submit.setVisibility(View.VISIBLE);
-                    }
-                })
+                .setProgress(PROGRESS_TYPE.OVERLAY)
+//                .setCallback(new TaskListener() {
+//                    @Override
+//                    public void postExecute(TaskManager tm, ResponseObj response) {
+//                        submit.setVisibility(View.VISIBLE);
+//                    }
+//                })
                 .run();
             }
         });
