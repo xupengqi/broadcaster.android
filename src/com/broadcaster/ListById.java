@@ -14,8 +14,8 @@ public class ListById extends BaseDrawerListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        showLoadMore = false;
         super.onCreate(savedInstanceState);
-        footerButton = null;
     }
 
     @Override

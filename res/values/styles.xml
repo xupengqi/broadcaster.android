@@ -35,21 +35,17 @@
     </style>
 
     <style name="gettingStartedTopItemStyle">
-        <item name="android:background">#FFF</item>
-        <item name="android:alpha">0.9</item>
         <item name="android:padding">6dip</item>
+        <item name="android:layout_marginBottom">6dip</item>
     </style>
 
     <style name="gettingStartedItemStyle">
         <item name="android:background">#EEE</item>
         <item name="android:alpha">0.9</item>
         <item name="android:padding">6dip</item>
-        <item name="android:layout_marginTop">6dip</item>
     </style>
 
     <style name="gettingStartedBottomItemStyle">
-        <item name="android:background">#333</item>
-        <item name="android:alpha">0.7</item>
         <item name="android:padding">6dip</item>
         <item name="android:layout_marginTop">6dip</item>
     </style>

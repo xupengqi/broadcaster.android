@@ -46,15 +46,16 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public class BaseDrawerListActivity extends BaseDrawerActivity {
-    private POST_LIST_TYPE mListType;
-    private List<PostObj> currentPosts;
     protected ArrayAdapter<PostObj> postListAdapter;
     protected ListViewWithOverScroll postListView;
-    protected Button footerButton;
+    protected boolean showLoadMore = true;
+
+    private POST_LIST_TYPE mListType;
+    private List<PostObj> currentPosts;
+    private Button footerButton;
     private View footerView;
     private LinearLayout footerProgress;
     private TextView footerText;
-
     private Spinner topicsSpinner;
     private ArrayAdapter<String> topicsSpinnerAdapter;
     private List<String> topicSpinnerItems;
@@ -77,6 +78,9 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
         footerProgress = (LinearLayout) footerView.findViewById(R.id.footer_progress);
         footerText = (TextView) footerView.findViewById(R.id.footer_text);
         footerButton = (Button) footerView.findViewById(R.id.footer_button);
+        if (showLoadMore) {
+            footerButton.setVisibility(View.VISIBLE);
+        }
 
         // setup adapter with no posts
         postListAdapter = new ArrayAdapter<PostObj>(this, R.layout.item_post, currentPosts) {
@@ -449,7 +453,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             if (footerProgress != null) {
                 footerProgress.setVisibility(View.GONE);
             }
-            if (footerButton != null) {
+            if (footerButton != null && showLoadMore) {
                 footerButton.setVisibility(View.VISIBLE);
             }
             break;
