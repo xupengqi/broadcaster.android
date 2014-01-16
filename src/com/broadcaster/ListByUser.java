@@ -22,7 +22,6 @@ public class ListByUser extends BaseDrawerListActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.menu_go_to_topic).setVisible(true);
         menu.findItem(R.id.menu_home).setVisible(true);
         menu.findItem(R.id.menu_new_post).setVisible(true);
         menu.findItem(R.id.menu_refresh).setVisible(true);

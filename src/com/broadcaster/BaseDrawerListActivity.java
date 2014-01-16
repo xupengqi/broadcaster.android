@@ -61,11 +61,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     private boolean spinnerCreated;
     private boolean haveMoreToLoad = true;
     private boolean isLoadingMore = false;
-    //    protected Spinner locations;
-    //    protected List<String> locationNames;
-    //    protected ArrayAdapter<String> locationsAdapter;
-    //    protected int viewingLocationPosition;
-    //    protected boolean showLocations = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,8 +157,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
 
         registerForContextMenu(postListView);
         getActionBar().setTitle("");
-
-        //        locationNames = new ArrayList<String>();
     }
 
     @Override
@@ -173,55 +166,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
             loadPosts();
         }
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        //        if (locations != null) {
-        //            updateLocations();
-        //            locationsAdapter.notifyDataSetChanged();
-        //            viewingLocationPosition = translateFromViewingPosition(pref.getViewingLocationPosition());
-        //            locations.setSelection(viewingLocationPosition);
-        //        }
-    }
-
-    /*protected void renderActionBarLocations() {
-        viewingLocationPosition = translateFromViewingPosition(pref.getViewingLocationPosition());
-        updateLocations();
-        LayoutInflater inflator = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        locationsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, locationNames);
-        locations = (Spinner) inflator.inflate(R.layout.module_spinner, null);
-        locations.setAdapter(locationsAdapter);
-        locations.setSelection(viewingLocationPosition);
-        locations.setOnItemSelectedListener(new OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                if (arg2 == locationNames.size()-1) {
-                    menuSettings();
-                }
-                else if (viewingLocationPosition != arg2){
-                    pref.setViewingLocation(translateToViewingPosition(arg2));
-                    TaskUtil.refreshPostsAndStarAndFinish(BaseDrawerListActivity.this, listener);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) { }
-        });
-
-        getActionBar().setCustomView(locations);
-        getActionBar().setDisplayShowCustomEnabled(true);
-    }
-
-    private void updateLocations() {
-        List<LocationObj> savedLocations = pref.getLocations();
-        locationNames.clear();
-        locationNames.add("Current Location");
-        for (LocationObj loc : savedLocations) {
-            locationNames.add(loc.name);
-        }
-        locationNames.add("Edit locations");
-    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -344,7 +288,7 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     protected int getContentView() {
         return R.layout.activity_list;
     }
-    
+
     protected void constructTopicsSpinner() {
         topicSpinnerItems.clear();
         topicSpinnerItems.add(Constants.SYSTEM_TOPICS.Homepage.toString());

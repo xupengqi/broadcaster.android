@@ -1,6 +1,7 @@
 package com.broadcaster.util;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -42,6 +43,10 @@ public class PrefUtil {
     private final String KEY_RADIUS = "RADIUS";
     private final String KEY_ERROR = "ERROR";
     private final String KEY_SEND_ERROR = "ERROR_SEND";
+    private final String KEY_LAST_TAG_UPDATE = "TAG_EXPIRE";
+    private final String KEY_LAST_LOC_UPDATE = "LOC_EXPIRE";
+    private final Long TAG_LIFE_MS = 21600000L; // 6 hours
+    private final Long LOC_LIFE_MS = 600000L; // 10 minutes
 
     public PrefUtil(BaseActivity c) {
         context = c;
@@ -213,7 +218,27 @@ public class PrefUtil {
     public void setAllTags(String allTags) {
         Editor editor = sharedPref.edit();
         editor.putString(KEY_ALLTAGS, allTags);
+        editor.putLong(KEY_LAST_TAG_UPDATE, (new Date()).getTime());
         editor.commit();
+        Util.debug("got new topics: "+allTags);
+    }
+    
+    public boolean isTagExpired() {
+        long elapsed = (new Date()).getTime() - sharedPref.getLong(KEY_LAST_TAG_UPDATE, 0);
+        if (elapsed > TAG_LIFE_MS) {
+            return true;
+        }
+        Util.debug("topics will expire in: " + (TAG_LIFE_MS - elapsed)/1000 + " seconds.");
+        return false;
+    }
+    
+    public boolean isLocExpired() {
+        long elapsed = (new Date()).getTime() - sharedPref.getLong(KEY_LAST_LOC_UPDATE, 0);
+        if (elapsed > LOC_LIFE_MS) {
+            return true;
+        }
+        Util.debug("location will expire in: " + (LOC_LIFE_MS - elapsed)/1000 + " seconds.");
+        return false;
     }
 
     public String getAllTags() {
@@ -223,6 +248,7 @@ public class PrefUtil {
     public void setRealLocation(LocationObj l) {
         Editor editor = sharedPref.edit();
         editor.putString(KEY_REAL_LOCATION, gson.toJson(l));
+        editor.putLong(KEY_LAST_LOC_UPDATE, (new Date()).getTime());
         editor.commit();
         Util.debug("got new location: "+l.name);
     }

@@ -16,16 +16,13 @@ public class TaskGetTopics extends TaskBase {
 
     @Override
     protected TaskManager doInBackground(TaskManager... args) {
-        List<NameValuePair> params = BaseActivity.api.getTagsParams();
-        mResponse = BaseActivity.api.getTags(params);
+        if (BaseActivity.pref.isTagExpired()) {
+            List<NameValuePair> params = BaseActivity.api.getTagsParams();
+            mResponse = BaseActivity.api.getTags(params);
+            List<String> tags = (new Gson()).fromJson(mResponse.data.get("tags"), new TypeToken<List<String>>(){}.getType());
+            BaseActivity.pref.setAllTags(StringUtils.join(tags,","));
+        }
 
         return super.doInBackground(args);
-    }
-
-    @Override
-    protected void onPostExecute(TaskManager tm) {
-        List<String> tags = (new Gson()).fromJson(mResponse.data.get("tags"), new TypeToken<List<String>>(){}.getType());
-        BaseActivity.pref.setAllTags(StringUtils.join(tags,","));
-        super.onPostExecute(tm);
     }
 }

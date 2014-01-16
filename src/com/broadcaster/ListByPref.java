@@ -28,7 +28,6 @@ public class ListByPref extends BaseDrawerListActivity {
         //header2.setText("near "+currentLocation);
         initProgressElements();
         //showLocations = true;
-        //renderActionBarLocations();
 
         /*if (pref.justInstalled()) {
             menuHelp();
