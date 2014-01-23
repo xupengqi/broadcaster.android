@@ -189,7 +189,7 @@ public class Settings extends BaseDrawerActivity {
                 passwordUpdate.setVisibility(View.INVISIBLE);
                 passwordProgress.setVisibility(View.VISIBLE);
                 (new TaskManager(Settings.this))
-                .addTask((new TaskUpdateAccount()).updateEmail(password.getText().toString()).setCallback(new TaskListener() {
+                .addTask((new TaskUpdateAccount()).updatePassword(password.getText().toString()).setCallback(new TaskListener() {
                     @Override
                     public void postExecute(TaskManager tm, ResponseObj response) {
                         passwordUpdate.setVisibility(View.VISIBLE);

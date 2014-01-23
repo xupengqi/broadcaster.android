@@ -26,7 +26,7 @@ public class PostEdit extends PostNew {
         mPost = (PostObj)getIntent().getExtras().getSerializable("postObj");
         gallery.setTag(mPost);
 
-        if(mPost.tags != null) {
+        if(mPost.tags != null) { // parent post
             for (int i=0; i<postTagItems.size(); i++) {
                 if (postTagItems.get(i).equals(mPost.tags)) {
                     postTag.setSelection(i);
@@ -35,10 +35,11 @@ public class PostEdit extends PostNew {
             postTitle.setText(mPost.getTitle());
             postText.setText(mPost.getText());
         }
-        else {
+        else { // child post
             postTag.setVisibility(View.GONE);
             postTitle.setText(mPost.getTitle());
             postText.setVisibility(View.GONE);
+            attach.setVisibility(View.GONE);
         }
 
         for (int i = 0; i < mPost.getAttachments().size(); i++) {
@@ -74,13 +75,6 @@ public class PostEdit extends PostNew {
     @Override
     protected TaskBase getPostTask() {
         return new TaskPostUpdate(mPost);
-    }
-
-    @Override
-    public PostObj constructNewPost() {
-        PostObj po = super.constructNewPost();
-        po.id = Integer.parseInt(postId.getText().toString());
-        return po;
     }
 
     private void insertAudio(final PostObj post, final AttachObj attach) throws MalformedURLException, IOException {

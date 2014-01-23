@@ -36,11 +36,11 @@ public class TaskUpdateAccount extends TaskBase {
             mResponse = BaseActivity.api.updateUsername(params);
         }
         if (mEmail != null) {
-            List<NameValuePair> params = BaseActivity.api.getUpdateEmailParams(BaseActivity.pref.getUser(), mUsername);
+            List<NameValuePair> params = BaseActivity.api.getUpdateEmailParams(BaseActivity.pref.getUser(), mEmail);
             mResponse = BaseActivity.api.updateEmail(params);
         }
         if (mPassword != null) {
-            List<NameValuePair> params = BaseActivity.api.getUpdatePasswordParams(BaseActivity.pref.getUser(), mUsername);
+            List<NameValuePair> params = BaseActivity.api.getUpdatePasswordParams(BaseActivity.pref.getUser(), mPassword);
             mResponse = BaseActivity.api.updatePassword(params);
         }
         return super.doInBackground(args);

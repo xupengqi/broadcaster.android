@@ -57,7 +57,7 @@ import com.broadcaster.view.AudioCaptureButton.OnNewCaptureListener;
 public class PostNew extends BaseDrawerActivity {
     private Uri fileUri;
     private EditText locationText; 
-    private Button attach;
+    protected Button attach;
     private Button attachImage;
     private Button attachVideo;
     private AudioCaptureButton attachAudio;
@@ -217,7 +217,7 @@ public class PostNew extends BaseDrawerActivity {
         switch (item.getItemId()) {
         case R.id.menu_submit:
             if (isValidPost()) {
-                mPost = constructNewPost();
+                mPost = constructNewPost(mPost);
                 Queue<TaskBase> attachmentTasks = new LinkedList<TaskBase>();
                 for(AttachObj attachment : attachments) {
                     switch(attachment.type) {
@@ -262,7 +262,11 @@ public class PostNew extends BaseDrawerActivity {
             @Override
             public void postExecute(TaskManager tm, ResponseObj response) {
                 Intent intent = new Intent(PostNew.this, ListByParent.class);
-                intent.putExtra("postId", mPost.id);
+                Integer postId = mPost.id;
+                if (mPost.parentId != null) {
+                    postId = mPost.parentId;
+                }
+                intent.putExtra("postId", postId);
                 startActivity(intent);
                 finish();
             }
@@ -477,8 +481,10 @@ public class PostNew extends BaseDrawerActivity {
         return list.size() > 0;
     }
 
-    public PostObj constructNewPost() {
-        PostObj po = new PostObj();
+    public PostObj constructNewPost(PostObj po) {
+        if (po == null) {
+            po = new PostObj();
+        }
         po.title = postTitle.getText().toString();
         po.setText(postText.getText().toString());
         po.visibility = 0;
