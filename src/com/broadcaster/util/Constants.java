@@ -7,7 +7,6 @@ public class Constants {
 //    public static final String authority = "24.6.160.109"; // home
     //public static final String authority = "54.225.66.76"; // amzn
     public static final String authority = "thebroadcaster.me"; // amzn
-    //public static final String appRoot = "p1/";
     public static final String appRoot = "broadcaster/";
     public static final String host = "http://"+authority+"/"+appRoot;
 
