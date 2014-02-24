@@ -21,7 +21,6 @@ import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import com.broadcaster.BaseActivity;
 
@@ -145,7 +144,6 @@ public class ImageUtil {
     // source: http://stackoverflow.com/a/6909144
     public static Bitmap cropCenter(Bitmap srcBmp) {
         if (srcBmp == null) {
-            Log.w("ImageUtil", "srcBmp is null");
             return srcBmp;
         }
 

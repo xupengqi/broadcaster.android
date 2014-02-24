@@ -378,7 +378,6 @@ public class BaseDrawerListActivity extends BaseDrawerActivity {
     protected void loadPosts() {
         List<PostObj> cachedPosts = pref.getPosts(getCurrentListType());
         if (cachedPosts.size() > 0) {
-            Util.debug(this, "Rendering from cached posts for tags ["+getCurrentListType()+"]");
             updatePostsList(cachedPosts, false, false);
         }
         else {

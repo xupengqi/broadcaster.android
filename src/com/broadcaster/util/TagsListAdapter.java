@@ -45,11 +45,9 @@ public class TagsListAdapter extends ArrayAdapter<String> {
             public void onCheckedChanged(CompoundButton arg0, boolean checked) {
                 String tag = arg0.getText().toString();
                 if(checked) {
-                    Util.debug("added tag " + tag);
                     selectedTags.add(tag);
                 }
                 else {
-                    Util.debug("removed tag " + tag);
                     selectedTags.remove(tag);
                 }
                 

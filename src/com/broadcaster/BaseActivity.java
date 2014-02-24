@@ -11,7 +11,6 @@ import android.content.IntentSender.SendIntentException;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
@@ -300,7 +299,7 @@ public abstract class BaseActivity extends FragmentActivity implements Connectio
     }
 
     public void showError(String source, String error) {
-        Log.e(source, error);
+        //Log.e(source, error);
         Toast.makeText(this, error, Toast.LENGTH_LONG).show();
     }
 

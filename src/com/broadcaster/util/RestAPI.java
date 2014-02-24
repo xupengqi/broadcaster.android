@@ -21,7 +21,6 @@ import org.apache.http.message.BasicNameValuePair;
 import android.net.Uri;
 import android.net.Uri.Builder;
 import android.net.http.AndroidHttpClient;
-import android.util.Log;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.model.AttachObj;
@@ -363,13 +362,13 @@ public class RestAPI {
             }
 
             ResponseHandler<String> responseHandler=new BasicResponseHandler();
-            Util.debug("HTTP "+method+": "+hq.getURI().toString());
+            //Util.debug("HTTP "+method+": "+hq.getURI().toString());
             lastResponse = hc.execute(hq, responseHandler);
             response = gson.fromJson(lastResponse, ResponseObj.class);
         }
         catch (Exception e) {
             response = new ResponseObj(ResponseError.createNoConnectionError());
-            Util.debug("lastResponse", lastResponse);
+            //Util.debug("lastResponse", lastResponse);
             e.printStackTrace();
         }
         finally {
@@ -415,14 +414,14 @@ public class RestAPI {
             hq.setEntity(fileentity);
 
             ResponseHandler<String> responseHandler=new BasicResponseHandler();
-            Log.i(this.toString(), hq.getURI().toString());
+            //Log.i(this.toString(), hq.getURI().toString());
             lastResponse = hc.execute(hq, responseHandler);
             response = gson.fromJson(lastResponse, ResponseObj.class);
         }
         catch (Exception e) {
             response = new ResponseObj(ResponseError.createNoConnectionError());
             Util.logError(context, e);
-            Log.i("lastResponse", lastResponse);
+            //Log.i("lastResponse", lastResponse);
         }
         finally {
             hc.close();
@@ -445,13 +444,13 @@ public class RestAPI {
             }
             hq = new HttpGet(uriBuilder.build().toString());
             ResponseHandler<String> responseHandler=new BasicResponseHandler();
-            Log.i("HTTP REQUEST", hq.getURI().toString());
+            //Log.i("HTTP REQUEST", hq.getURI().toString());
             lastResponse = hc.execute(hq, responseHandler);
             response = gson.fromJson(lastResponse, GeocodeResponse.class);
         }
         catch (Exception e) {
             Util.logError(context, e);
-            Log.i("lastResponse", lastResponse);
+            //Log.i("lastResponse", lastResponse);
         }
         finally {
             hc.close();

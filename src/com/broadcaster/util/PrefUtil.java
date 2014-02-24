@@ -220,7 +220,7 @@ public class PrefUtil {
         editor.putString(KEY_ALLTAGS, allTags);
         editor.putLong(KEY_LAST_TAG_UPDATE, (new Date()).getTime());
         editor.commit();
-        Util.debug("got new topics: "+allTags);
+        //Util.debug("got new topics: "+allTags);
     }
     
     public boolean isTagExpired() {
@@ -228,7 +228,7 @@ public class PrefUtil {
         if (elapsed > TAG_LIFE_MS) {
             return true;
         }
-        Util.debug("topics will expire in: " + (TAG_LIFE_MS - elapsed)/1000 + " seconds.");
+        //Util.debug("topics will expire in: " + (TAG_LIFE_MS - elapsed)/1000 + " seconds.");
         return false;
     }
     
@@ -237,7 +237,7 @@ public class PrefUtil {
         if (elapsed > LOC_LIFE_MS) {
             return true;
         }
-        Util.debug("location will expire in: " + (LOC_LIFE_MS - elapsed)/1000 + " seconds.");
+        //Util.debug("location will expire in: " + (LOC_LIFE_MS - elapsed)/1000 + " seconds.");
         return false;
     }
 
@@ -250,7 +250,7 @@ public class PrefUtil {
         editor.putString(KEY_REAL_LOCATION, gson.toJson(l));
         editor.putLong(KEY_LAST_LOC_UPDATE, (new Date()).getTime());
         editor.commit();
-        Util.debug("got new location: "+l.name);
+        //Util.debug("got new location: "+l.name);
     }
 
     public LocationObj getRealLocation() {
@@ -325,7 +325,7 @@ public class PrefUtil {
     }
 
     public void setRadiusInKm(float seekBarToRadius) {
-        Util.debug("changed radius to: "+seekBarToRadius+"km");
+        //Util.debug("changed radius to: "+seekBarToRadius+"km");
         Editor editor = sharedPref.edit();
         editor.putFloat(KEY_RADIUS, seekBarToRadius);
         editor.commit();

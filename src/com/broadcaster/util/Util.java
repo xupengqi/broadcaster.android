@@ -9,11 +9,9 @@ import android.content.pm.Signature;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.broadcaster.BaseActivity;
 import com.broadcaster.task.TaskManager;
@@ -50,14 +48,6 @@ public class Util {
         Log.i("***", msg);
     }
 
-    public static void debug(String source, String msg) { 
-        Log.i("***"+source, msg);
-    }
-
-    public static void debug(Object source, String msg) { 
-        Log.i("***"+source.getClass().getSimpleName(), msg);
-    }
-
     public static void logError(BaseActivity context, final Exception e) {
         if (BaseActivity.pref.sendErrorAllowed()) {
             (new TaskManager(context))
@@ -76,9 +66,8 @@ public class Util {
             for (Signature signature : info.signatures) {
                 MessageDigest md = MessageDigest.getInstance("SHA");
                 md.update(signature.toByteArray());
-                String sign=Base64.encodeToString(md.digest(), Base64.DEFAULT);
-                Log.e("MY KEY HASH:", sign);
-                Toast.makeText(context.getApplicationContext(),sign,     Toast.LENGTH_LONG).show();
+                //String sign=Base64.encodeToString(md.digest(), Base64.DEFAULT);
+                //Log.e("MY KEY HASH:", sign);
             }
         } catch (Exception e) {
             e.printStackTrace();
