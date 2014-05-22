@@ -37,13 +37,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp" />
+        android:layout_marginTop="30dp"
+        android:visibility="gone" />
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/login_googleplus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp" />
+        android:layout_marginTop="30dp"
+        android:visibility="gone" />
 
 </LinearLayout>

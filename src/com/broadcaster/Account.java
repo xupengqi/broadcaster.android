@@ -18,7 +18,7 @@ public class Account extends BaseDrawerTabActivity {
 
     @Override
     protected void initTabs() {
-        //getActionBar().addTab(getActionBar().newTab().setText("Password?").setTabListener(tabListener));
+        getActionBar().addTab(getActionBar().newTab().setText("Password?").setTabListener(tabListener));
         getActionBar().addTab(getActionBar().newTab().setText("Login").setTabListener(tabListener));
         getActionBar().addTab(getActionBar().newTab().setText("New User").setTabListener(tabListener));
     }

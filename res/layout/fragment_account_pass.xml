@@ -22,4 +22,13 @@
         android:enabled="false"
         android:text="@string/button_pass" />
 
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:text="This feature is currently disbaled."
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
 </LinearLayout>
